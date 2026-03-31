@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- active 값: home | diary | ai | friend | mypage -->
+<nav th:fragment="navbar(active)">
+  <div class="nav-bar">
+    <button class="nav-item" th:classappend="${active == 'home'}    ? ' active'" onclick="location.href='/'">
+      <span class="nav-icon">🏡</span>홈
+    </button>
+    <button class="nav-item" th:classappend="${active == 'diary'}   ? ' active'" onclick="location.href='/diary'">
+      <span class="nav-icon">📚</span>서재
+    </button>
+    <button class="nav-item" th:classappend="${active == 'ai'}      ? ' active'" onclick="location.href='/ai'">
+      <span class="nav-icon">✨</span>AI
+    </button>
+    <button class="nav-item" th:classappend="${active == 'friend'}  ? ' active'" onclick="location.href='/friends'">
+      <span class="nav-icon">👥</span>친구
+    </button>
+    <button class="nav-item" th:classappend="${active == 'mypage'}  ? ' active'" onclick="location.href='/mypage'">
+      <span class="nav-icon">👤</span>마이
+    </button>
+  </div>
+</nav>
+
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('홈')}"></head>
+
+<body>
+
+<div th:replace="~{fragments/header :: header-home}"></div>
+
+<div class="page-wrap">
+  <div class="container">
+
+    <!-- 제목 -->
+    <div class="flex-between mt-md mb-md">
+      <div>
+        <div class="text-hint text-sm">Preview</div>
+        <div class="text-lg">BookForest UI Kit</div>
+      </div>
+    </div>
+
+    <!-- 버튼 -->
+    <div class="card mb-md">
+      <div class="card-label">Buttons</div>
+
+      <div class="flex-col gap-sm mb-sm">
+        <button class="btn btn-primary btn-full">로그인</button>
+        <button class="btn btn-outline btn-full">회원가입</button>
+        <button class="btn btn-ghost btn-full">취소</button>
+        <button class="btn btn-danger btn-full">회원 탈퇴</button>
+      </div>
+
+      <div class="flex gap-sm">
+        <button class="btn btn-primary btn-sm">저장</button>
+        <button class="btn btn-outline btn-sm btn-pill">+ 추가</button>
+        <button class="btn btn-ghost btn-sm">취소</button>
+      </div>
+    </div>
+
+    <!-- 입력 폼 -->
+    <div class="card mb-md">
+      <div class="card-label">Form</div>
+
+      <div class="form-group">
+        <label class="form-label">이메일</label>
+        <input class="form-input" type="email" placeholder="이메일을 입력하세요">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">비밀번호</label>
+        <input class="form-input error" type="password" placeholder="비밀번호를 입력하세요">
+        <div class="form-error">비밀번호가 일치하지 않아요</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">독후감</label>
+        <textarea class="form-textarea" placeholder="책 감상을 적어보세요"></textarea>
+        <div class="form-hint">최대 500자</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">독서 상태</label>
+        <select class="form-select">
+          <option>읽는 중</option>
+          <option>완독</option>
+          <option>읽고 싶다</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 카드 -->
+    <div class="card mb-md">
+      <div class="card-label">Card</div>
+
+      <div class="flex gap-md items-center">
+        <div style="width:52px;height:70px;background:var(--color-primary-light);border-radius:6px;"></div>
+
+        <div style="flex:1">
+          <div class="text-md mb-sm">예시 책 제목</div>
+          <div class="text-sm text-hint mb-sm">저자 · 출판사</div>
+
+          <div class="progress-label">
+            <span>진행도</span>
+            <span>120 / 300p</span>
+          </div>
+
+          <div class="progress-track">
+            <div class="progress-fill" style="width:40%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 배지 -->
+    <div class="card mb-md">
+      <div class="card-label">Badge</div>
+
+      <div class="flex gap-sm" style="flex-wrap:wrap">
+        <span class="badge badge-primary">읽는 중</span>
+        <span class="badge badge-gray">완독</span>
+        <span class="badge badge-warning">읽고 싶다</span>
+        <span class="badge badge-danger">중단</span>
+      </div>
+    </div>
+
+    <!-- 리스트 -->
+    <div class="card mb-md">
+      <div class="card-label">List</div>
+
+      <div class="list-item">
+        <div style="width:40px;height:54px;background:var(--color-primary-light);border-radius:4px;"></div>
+        <div style="flex:1">
+          <div class="text-sm text-bold">아몬드</div>
+          <div class="text-xs text-hint">손원평</div>
+        </div>
+        <span class="badge badge-gray">완독</span>
+      </div>
+
+      <div class="list-item">
+        <div style="width:40px;height:54px;background:#E6F1FB;border-radius:4px;"></div>
+        <div style="flex:1">
+          <div class="text-sm text-bold">달러구트 꿈 백화점</div>
+          <div class="text-xs text-hint">이미예</div>
+        </div>
+        <span class="badge badge-primary">읽는 중</span>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="flex-col gap-sm mb-md">
+      <button class="btn btn-primary btn-full">시작하기</button>
+      <button class="btn btn-outline btn-full">둘러보기</button>
+    </div>
+
+  </div>
+</div>
+
+<div th:replace="~{fragments/navbar :: navbar('home')}"></div>
+
+</body>
+</html>

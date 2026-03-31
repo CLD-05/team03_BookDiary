@@ -5,7 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public abstract class BaseController {
-
+// 지워주세요
     protected static final int ROW_CNT = 10; // 페이지당 행 수
 
     // 현재 로그인한 유저 이메일

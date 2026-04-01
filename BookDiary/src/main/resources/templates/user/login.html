@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('로그인')}"></head>
+<body>
+<div th:replace="~{fragments/header :: header('로그인')}"></div>
+
+<div class="page-wrap">
+    <div class="container">
+        <div class="card-lg mt-lg">
+            <div class="card-label">Welcome Back</div>
+
+            <div class="form-group">
+                <label class="form-label">아이디</label>
+                <input type="text" id="userId" class="form-input" placeholder="아이디를 입력하세요">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">비밀번호</label>
+                <input type="password" id="pass" class="form-input" placeholder="비밀번호를 입력하세요">
+            </div>
+
+            <button onclick="handleLogin()" class="btn btn-primary btn-full mt-md">로그인</button>
+            <button onclick="location.href='/auth/signup'" class="btn btn-ghost btn-full mt-sm">회원가입</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleLogin() {
+        const data = {
+            userId: document.getElementById('userId').value,
+            pass: document.getElementById('pass').value
+        };
+
+        fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (res.result) {
+                    // 서버가 보내준 JWT 토큰을 로컬 스토리지에 저장
+                    localStorage.setItem('token', res.data);
+                    alert('로그인 성공!');
+                    location.href = '/'; // 메인 페이지로 이동
+                } else {
+                    alert(res.message);
+                }
+            })
+            .catch(err => alert('로그인 중 오류가 발생했습니다.'));
+    }
+</script>
+</body>
+</html>

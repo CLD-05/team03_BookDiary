@@ -33,7 +33,10 @@ public class SecurityConfig {
                     "/api/auth/login",
                     "/api/auth/signup",
                     "/api/auth/findId",
-                    "/api/auth/findPass"
+                    "/api/auth/findPass",
+                        "/auth/**",       // 회원가입/로그인 '페이지' 접근 허용 (임시)
+                        "/api/auth/**",    // 회원가입/로그인 'API' 처리 허용 (임시)
+                        "/mypage"      // mypage (임시)
                 ).permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     // api 테스트 코드

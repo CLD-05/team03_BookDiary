@@ -23,22 +23,21 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(s -> s
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-            	    .requestMatchers(
-            	        "/",    
-            	        "/css/**",            
-            	        "/js/**",            
-            	        "/images/**", 
-            	        "/api/auth/login",
-            	        "/api/auth/signup",
-            	        "/api/auth/findId",
-            	        "/api/auth/findPass"
-            	    ).permitAll()
-            	    .requestMatchers("/api/admin/**").hasRole("ADMIN")
-            	    .anyRequest().authenticated()
-            	)
+                .requestMatchers(
+                    "/",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/api/auth/login",
+                    "/api/auth/signup",
+                    "/api/auth/findId",
+                    "/api/auth/findPass"
+                ).permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+            )
             .addFilterBefore(
                 new JwtFilter(jwtService),
                 UsernamePasswordAuthenticationFilter.class

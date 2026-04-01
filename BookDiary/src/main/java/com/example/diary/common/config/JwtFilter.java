@@ -28,13 +28,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (token != null && jwtService.isValid(token)) {
             String userId = jwtService.getUserId(token);
-            String role   = jwtService.getRole(token);
+            String role = jwtService.getRole(token);
 
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(
                             userId,
                             null,
-                            List.of(new SimpleGrantedAuthority(role))
+                            List.of(new SimpleGrantedAuthority("ROLE_" + role))
                     );
 
             SecurityContextHolder.getContext().setAuthentication(auth);

@@ -14,6 +14,10 @@ local.properties
 .loadpath
 .recommenders
 
+# Config
+src/main/resources/application*.properties
+src/main/resources/application*.yml
+
 # External tool builders
 .externalToolBuilders/
 

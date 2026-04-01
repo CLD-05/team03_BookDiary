@@ -1,5 +1,19 @@
 package com.example.diary.book.dto;
 
-public class BookResponseDto {
+import lombok.Builder;
+import lombok.Getter;
 
+import java.time.LocalDate;
+
+@Getter
+@Builder
+public class BookResponseDto {
+    private Long bookId;
+    private String isbn;
+    private String title;
+    private String author;
+    private String publisher;
+    private String category;
+    private String imageUrl;
+    private LocalDate publishDate;
 }

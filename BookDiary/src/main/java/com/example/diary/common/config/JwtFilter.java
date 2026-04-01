@@ -29,14 +29,14 @@ public class JwtFilter extends OncePerRequestFilter {
         if (token != null && jwtService.isValid(token)) {
             String userId = jwtService.getUserId(token);
             String role = jwtService.getRole(token);
+            Long userIdx = jwtService.getUserIdx(token);
 
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(
                             userId,
-                            null,
+                            userIdx,  // credentials 자리에 userIdx
                             List.of(new SimpleGrantedAuthority("ROLE_" + role))
                     );
-
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
@@ -44,9 +44,18 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
+        // 헤더에서 먼저 찾기
         String bearer = request.getHeader("Authorization");
         if (bearer != null && bearer.startsWith("Bearer ")) {
             return bearer.substring(7);
+        }
+        // 쿠키에서 찾기
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
         return null;
     }

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>로그인</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700">
+<link th:href="@{/plugins/global/plugins.bundle.css}" rel="stylesheet">
+<link th:href="@{/css/style.bundle.css}" rel="stylesheet">
+</head>
+
+<body class="bg-body">
+
+    <div class="d-flex flex-column flex-root" style="height: 100vh;">
+        <div class="d-flex flex-column flex-column-fluid flex-center">
+
+            <div class="w-100 px-6" style="max-width: 400px;">
+
+                <!--로고/타이틀-->
+                <div class="text-center mb-10">
+                    <h1 class="fw-bolder fs-2x text-gray-900 mb-2">다시 만나서 반가워요</h1>
+                    <span class="fs-6 text-gray-500">책과 함께하는 나만의 독서 일기</span>
+                </div>
+
+                <!--로그인 카드-->
+                <div class="card shadow-sm">
+                    <div class="card-body p-8">
+
+                        <!--아이디-->
+                        <div class="mb-5">
+                            <label class="form-label fw-semibold text-gray-700">아이디</label>
+                            <input type="text" id="userId" class="form-control form-control-lg"
+                                   placeholder="아이디를 입력하세요">
+                        </div>
+
+                        <!--비밀번호-->
+                        <div class="mb-8">
+                            <label class="form-label fw-semibold text-gray-700">비밀번호</label>
+                            <input type="password" id="pass" class="form-control form-control-lg"
+                                   placeholder="비밀번호를 입력하세요">
+                        </div>
+
+                        <!--로그인 버튼-->
+                        <button type="button" onclick="handleLogin()"
+                                class="btn btn-primary w-100 btn-lg mb-5">
+                            로그인
+                        </button>
+
+                        <!--회원가입 링크-->
+                        <div class="text-center">
+                            <span class="fs-7 text-gray-500">계정이 없으신가요?</span>
+                            <a href="/auth/signup" class="fs-7 fw-semibold ms-1">회원가입</a>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+<script th:src="@{/plugins/global/plugins.bundle.js}"></script>
+<script th:src="@{/js/scripts.bundle.js}"></script>
+<script>
+    function handleLogin() {
+        const userId = document.getElementById('userId').value;
+        const pass = document.getElementById('pass').value;
+
+        if (!userId || !pass) {
+            Swal.fire({
+                text: "아이디와 비밀번호를 모두 입력해주세요.",
+                icon: "warning",
+                buttonsStyling: false,
+                confirmButtonText: "확인",
+                customClass: {
+                    confirmButton: "btn btn-primary"
+                }
+            });
+            return;
+        }
+
+        fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, pass })
+        })
+        .then(res => res.json())
+        .then(res => {
+        	if (res.result) {
+        	    // localStorage 대신 쿠키에 저장
+        	    document.cookie = `token=${res.data}; path=/; max-age=86400`;  // 24시간
+        	    Swal.fire({
+        	        text: "로그인 성공! 환영합니다 😊",
+        	        icon: "success",
+        	        buttonsStyling: false,
+        	        confirmButtonText: "시작하기",
+        	        customClass: { confirmButton: "btn btn-primary" }
+        	    }).then(() => {
+        	        location.href = '/diary/home';
+        	    });
+        	} else {
+                Swal.fire({
+                    text: res.message,
+                    icon: "error",
+                    buttonsStyling: false,
+                    confirmButtonText: "다시 시도",
+                    customClass: {
+                        confirmButton: "btn btn-danger"
+                    }
+                }).then(() => {
+                    document.getElementById('pass').value = '';
+                    document.getElementById('pass').focus();
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Login Error:', err);
+            Swal.fire({
+                text: "서버와 통신 중 오류가 발생했습니다.",
+                icon: "error",
+                buttonsStyling: false,
+                confirmButtonText: "확인",
+                customClass: {
+                    confirmButton: "btn btn-danger"
+                }
+            });
+        });
+    }
+
+    document.getElementById('pass').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') handleLogin();
+    });
+</script>
+
+</body>
+</html>

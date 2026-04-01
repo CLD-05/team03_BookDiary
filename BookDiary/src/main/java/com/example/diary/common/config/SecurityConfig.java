@@ -17,47 +17,39 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtService jwtService;
+	private final JwtService jwtService;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/",
-                    "/css/**",
-                    "/js/**",
-                    "/images/**",
-                    "/media/**",
-                    "/plugins/**",
-                    "/publishing/**",
-                    "/api/auth/login",
-                    "/api/auth/signup",
-                    "/api/auth/findId",
-                    "/api/auth/findPass",
-                        "/auth/**",       // 회원가입/로그인 '페이지' 접근 허용 (임시)
-                        "/api/auth/**",    // 회원가입/로그인 'API' 처리 허용 (임시)
-                        "/mypage",      // mypage (임시)
-                        "/api/books/search", // 책검색(임시)
-                        "/api/diary/**" // 서재 관련(임시)
-                ).permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                    // api 테스트 코드
-                    .requestMatchers("/test/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(
-                new JwtFilter(jwtService),
-                UsernamePasswordAuthenticationFilter.class
-            );
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http.csrf(AbstractHttpConfigurer::disable)
+				.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(auth -> auth
+					    .requestMatchers(
+					        "/",
+					        "/css/**",
+					        "/js/**",
+					        "/images/**",
+					        "/media/**",
+					        "/plugins/**",
+					        "/publishing/**",
+					        "/diary/**",        // 추가
+					        "/auth/**",
+					        "/api/auth/**",
+					        "/mypage",
+					        "/api/books/search",
+					        "/api/diary/**"
+					    ).permitAll()
+					    .requestMatchers("/api/admin/**").hasRole("ADMIN")
+					    .requestMatchers("/test/**").permitAll()
+					    .anyRequest().authenticated()
+					)
+				.addFilterBefore(new JwtFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+		return http.build();
+	}
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

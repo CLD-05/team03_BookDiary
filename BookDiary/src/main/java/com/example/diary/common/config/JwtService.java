@@ -17,13 +17,13 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long expiration;
 
-    public String generateToken(String userId, String role) {
+    public String generateToken(String userId, String role, Long userIdx) {
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + expiration);
-
         return JWT.create()
                 .withSubject(userId)
                 .withClaim("role", role)
+                .withClaim("userIdx", userIdx)
                 .withIssuedAt(now)
                 .withExpiresAt(expireDate)
                 .sign(Algorithm.HMAC256(secret));
@@ -42,6 +42,14 @@ public class JwtService {
                 .verify(token)
                 .getClaim("role")
                 .asString();
+    }
+
+    public Long getUserIdx(String token) {
+        return JWT.require(Algorithm.HMAC256(secret))
+                .build()
+                .verify(token)
+                .getClaim("userIdx")
+                .asLong();
     }
 
     public boolean isValid(String token) {

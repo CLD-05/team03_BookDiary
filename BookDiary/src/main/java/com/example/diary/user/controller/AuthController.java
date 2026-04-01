@@ -9,12 +9,12 @@ public class AuthController extends BaseController {
 
     @GetMapping("/auth/signup")
     public String signupPage() {
-        return "user/signup";
+        return "pages/user/signup";
     }
 
     @GetMapping("/auth/login")
     public String loginPage() {
-        return "user/login";
+        return "pages/user/login";
     }
 
     // 내 프로필 이동 추가
@@ -24,6 +24,6 @@ public class AuthController extends BaseController {
 //        if (!isLoggedIn()) {          // 일단 서버 로그인이 안 되어 있어도 가능하게 전체 주석
 //            return "redirect:/auth/login";
 //        }
-        return "user/mypage";
+        return "pages/user/mypage";
     }
 }

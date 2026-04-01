@@ -57,7 +57,7 @@ public class DiaryService {
 
         TbDiary savedDiary = diaryRepository.save(diary);
 
-        return toDiaryResponseDto(savedDiary);
+        return DiaryResponseDto.fromEntity(savedDiary);
     }
 
     private TbBook saveBook(CreateDiaryRequest request, String normalizedIsbn) {
@@ -82,7 +82,7 @@ public class DiaryService {
         List<TbDiary> diaryList = diaryRepository.findAllByUser_IdxUserOrderByIdxDiaryDesc(userIdx);
 
         return diaryList.stream()
-                .map(this::toDiaryResponseDto)
+                .map(DiaryResponseDto::fromEntity)
                 .toList();
     }
 

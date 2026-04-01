@@ -46,7 +46,7 @@ public class UserService {
         }
 
         // 3. 인증 성공 시 JWT 토큰 생성 및 반환
-        return jwtService.generateToken(user.getUserId(), user.getRole().name());
+        return jwtService.generateToken(user.getUserId(), user.getRole().name(), user.getIdxUser());
     }
 
     @Transactional

@@ -1,31 +1,32 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+	<!--기본 홈 헤더-->
+	<th:block th:fragment="header-main">
+		<div class="d-flex flex-column-auto bg-white border-bottom px-4 py-3">
+			<div class="d-flex justify-content-between align-items-center w-100">
+				<span class="fw-bolder fs-3 text-gray-900">📚 BookDiary</span>
+			</div>
+		</div>
+	</th:block>
 
-<!-- 뒤로가기 버튼 있는 헤더 -->
-<header th:fragment="header(title)">
-  <div class="header">
-    <button class="header-back" onclick="history.back()">←</button>
-    <span class="header-title" th:text="${title}">BookDiary</span>
-    <span style="min-width:36px"></span>
-  </div>
-</header>
+	<!--뒤로가기 버튼 헤더-->
+	<th:block th:fragment="header-back(title)">
+	    <div class="d-flex flex-column-auto bg-white border-bottom px-4 py-3">
+	        <div class="d-flex justify-content-between align-items-center w-100">
+	            <button class="btn btn-sm btn-icon btn-light"
+	                    onclick="history.back()">
+	                <i class="ki-duotone ki-arrow-left fs-3">
+	                    <span class="path1"></span>
+	                    <span class="path2"></span>
+	                </i>
+	            </button>
+	            <span class="fw-bold fs-5 text-gray-900" th:text="${title}"></span>
+	            <div style="width: 34px;"></div>
+	        </div>
+	    </div>
+	</th:block>
 
-<!-- 오른쪽 액션 버튼 있는 헤더 -->
-<header th:fragment="header-action(title, actionLabel, actionUrl)">
-  <div class="header">
-    <button class="header-back" onclick="history.back()">←</button>
-    <span class="header-title" th:text="${title}">BookDiary</span>
-    <a class="header-action" th:href="${actionUrl}" th:text="${actionLabel}">저장</a>
-  </div>
-</header>
-
-<!-- 로고 헤더 (홈용) -->
-<header th:fragment="header-home">
-  <div class="header">
-    <span style="min-width:36px"></span>
-    <span class="header-title">📚 BookDiary</span>
-    <span style="min-width:36px"></span>
-  </div>
-</header>
-
+</body>
 </html>

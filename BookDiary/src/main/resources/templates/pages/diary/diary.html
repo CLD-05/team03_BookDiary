@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>홈</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700">
+<link th:href="@{/plugins/global/plugins.bundle.css}" rel="stylesheet">
+<link th:href="@{/css/style.bundle.css}" rel="stylesheet">
+<style>
+    html, body {
+        height: 100%;
+        overflow: hidden;
+    }
+    #scrollContainer {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+</style>
+</head>
+
+<body>
+    <div class="d-flex flex-column" style="height: 100vh;">
+
+        <!--헤더 고정-->
+        <div th:replace="~{fragments/header :: header-main}"></div>
+
+        <!--콘텐츠만 스크롤-->
+        <div id="scrollContainer" class="flex-grow-1" style="overflow-y: auto;">
+            <div class="p-4 w-100 d-flex flex-column gap-3">
+
+                <!--읽은 책 없을 때-->
+                <div th:if="${#lists.isEmpty(diaryList)}"
+                     class="d-flex flex-column align-items-center justify-content-center gap-3 py-20">
+                    <i class="ki-duotone ki-book fs-5x text-gray-300">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                    <span class="fs-5 fw-semibold text-gray-500">아직 읽은 책이 없어요</span>
+                    <span class="fs-7 text-gray-400">오른쪽 아래 버튼을 눌러 책을 추가해보세요!</span>
+                </div>
+
+                <!--읽은 책 리스트-->
+                <div id="diaryContainer" class="d-flex flex-column gap-3">
+                    <div th:each="diary : ${diaryList}" class="card shadow-sm"
+                         th:onclick="|location.href='/diary/detail/${diary.diaryId}'|"
+                         style="cursor: pointer;">
+                        <div class="card-body">
+                            <div class="d-flex gap-4">
+                                <div class="flex-row-auto">
+                                    <img th:src="${diary.imageUrl}" class="rounded"
+                                         style="width: 80px; height: 110px; object-fit: cover;"
+                                         onerror="this.src='https://picsum.photos/80/110'">
+                                </div>
+                                <div class="d-flex flex-column flex-row-fluid gap-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge badge-sm"
+                                              th:classappend="${diary.status.name() == 'READING'} ? 'badge-light-primary' :
+                                                             (${diary.status.name() == 'DONE'} ? 'badge-light-success' : 'badge-light-secondary')"
+                                              th:text="${diary.status.name() == 'READING'} ? '📖 읽는 중' :
+                                                       (${diary.status.name() == 'DONE'} ? '✅ 완독' : '🔖 읽고 싶어요')">
+                                        </span>
+                                        <i class="ki-duotone ki-heart fs-3"
+                                           th:classappend="${diary.favorite} ? 'text-danger' : 'text-gray-300'">
+                                            <span class="path1"></span><span class="path2"></span>
+                                        </i>
+                                    </div>
+                                    <span class="fw-bold fs-5 text-gray-800 lh-sm"
+                                          th:text="${diary.title}"></span>
+                                    <span class="fs-7 text-gray-500">
+                                        <span th:text="${diary.author}"></span>
+                                        <span th:if="${diary.publisher != null}">
+                                            · <span th:text="${diary.publisher}"></span>
+                                        </span>
+                                    </span>
+                                    <div th:if="${diary.category != null}">
+                                        <span class="badge badge-light-info badge-sm"
+                                              th:text="${diary.category}"></span>
+                                    </div>
+                                    <div th:if="${diary.rating != null}"
+                                         class="d-flex align-items-center gap-1">
+                                        <div class="rating">
+                                            <div th:each="i : ${#numbers.sequence(1, 5)}"
+                                                 class="rating-label"
+                                                 th:classappend="${i <= diary.rating} ? 'checked' : ''">
+                                                <i class="ki-duotone ki-star fs-7"></i>
+                                            </div>
+                                        </div>
+                                        <span class="fs-8 text-gray-500 ms-1"
+                                              th:text="${diary.rating}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--로딩 스피너-->
+                <div id="loadingSpinner" class="d-flex justify-content-center py-4 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <!--스크롤 감지용-->
+                <div id="scrollAnchor" style="height: 1px;"></div>
+
+            </div>
+        </div>
+        <!--end::Content-->
+
+        <!--네비 고정-->
+        <div th:replace="~{fragments/navbar :: navbar-main('home')}"></div>
+
+    </div>
+    <!--end::Root-->
+
+    <!--플러스 버튼-->
+    <div th:replace="~{fragments/navbar :: btn-add('/diary/add')}"></div>
+    
+    <input type="hidden" id="hasNextValue" th:value="${hasNext}">
+
+    <script th:src="@{/plugins/global/plugins.bundle.js}"></script>
+    <script th:src="@{/js/scripts.bundle.js}"></script>
+
+
+    <script th:inline="javascript">
+    function getToken() {
+        const cookies = document.cookie.split(';');
+        for (let c of cookies) {
+            const [key, val] = c.trim().split('=');
+            if (key === 'token') return val;
+        }
+        return null;
+    }
+
+    if (!getToken()) location.href = '/publishing/login';
+
+    let currentPage = 2;
+    let isLoading = false;
+    let hasNext = document.getElementById('hasNextValue').value === 'true';
+
+    function loadMoreDiaries() {
+    	console.log('loadMoreDiaries 호출됨, hasNext:', hasNext, 'isLoading:', isLoading);
+        if (isLoading || !hasNext) return;
+
+        isLoading = true;
+
+        document.getElementById('loadingSpinner').classList.remove('d-none');
+
+        fetch(`/api/diary?page=${currentPage}`, {
+            headers: { 'Authorization': 'Bearer ' + getToken() }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (!res.result) return;
+
+            const container = document.getElementById('diaryContainer');
+            res.data.forEach(diary => {
+                const card = document.createElement('div');
+                card.className = 'card shadow-sm';
+                card.style.cursor = 'pointer';
+                card.onclick = () => location.href = `/diary/detail/${diary.diaryId}`;
+                card.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex gap-4">
+                            <div class="flex-row-auto">
+                                <img src="${diary.imageUrl || 'https://picsum.photos/80/110'}"
+                                     class="rounded"
+                                     style="width: 80px; height: 110px; object-fit: cover;"
+                                     onerror="this.src='https://picsum.photos/80/110'">
+                            </div>
+                            <div class="d-flex flex-column flex-row-fluid gap-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge badge-sm ${diary.status === 'READING' ? 'badge-light-primary' : diary.status === 'DONE' ? 'badge-light-success' : 'badge-light-secondary'}">
+                                        ${diary.status === 'READING' ? '📖 읽는 중' : diary.status === 'DONE' ? '✅ 완독' : '🔖 읽고 싶어요'}
+                                    </span>
+                                    <i class="ki-duotone ki-heart fs-3 ${diary.favorite ? 'text-danger' : 'text-gray-300'}">
+                                        <span class="path1"></span><span class="path2"></span>
+                                    </i>
+                                </div>
+                                <span class="fw-bold fs-5 text-gray-800 lh-sm">${diary.title}</span>
+                                <span class="fs-7 text-gray-500">
+                                    ${diary.author || ''}${diary.publisher ? ' · ' + diary.publisher : ''}
+                                </span>
+                                ${diary.category ? `<div><span class="badge badge-light-info badge-sm">${diary.category}</span></div>` : ''}
+                                ${diary.rating ? `
+                                    <div class="d-flex align-items-center gap-1">
+                                        <div class="rating">
+                                            ${[1,2,3,4,5].map(i => `
+                                                <div class="rating-label ${i <= diary.rating ? 'checked' : ''}">
+                                                    <i class="ki-duotone ki-star fs-7"></i>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                        <span class="fs-8 text-gray-500 ms-1">${diary.rating}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            hasNext = res.pagePos < res.pageCnt;
+            currentPage++;
+        })
+        .finally(() => {
+            isLoading = false;
+            document.getElementById('loadingSpinner').classList.add('d-none');
+        });
+    }
+
+    // IntersectionObserver로 scrollAnchor 감지
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+            console.log('바닥 감지됨!');
+            loadMoreDiaries();
+        }
+    }, {
+        root: document.getElementById('scrollContainer'),
+        threshold: 0.1
+    });
+
+    observer.observe(document.getElementById('scrollAnchor'));
+    </script>
+
+</body>
+</html>

@@ -32,10 +32,12 @@ public class SecurityConfig {
 					        "/media/**",
 					        "/plugins/**",
 					        "/publishing/**",
-					        "/diary/**",        // 추가
+					        "/diary/**",
+					        "/highlight/**",
 					        "/auth/**",
 					        "/api/auth/**",
-					        "/mypage",
+					        "/mypage/**",
+					        "/api/users/**",
 					        "/api/books/search",
 					        "/api/diary/**"
 					    ).permitAll()

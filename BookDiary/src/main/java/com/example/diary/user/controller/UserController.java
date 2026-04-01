@@ -10,26 +10,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController extends BaseController {
 
     private final UserService userService;
 
-    @GetMapping("/profile")
+    @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserResponseDto>> getProfile() {
-        // BaseController의 getCurrentUser() 사용
         return ok(UserResponseDto.fromEntity(getCurrentUser()));
     }
 
-    @PatchMapping("/profile")
+    @PatchMapping("/me")
     public ResponseEntity<ApiResponse<Void>> updateProfile(@RequestBody UserUpdateDto dto) {
-        // BaseController의 getCurrentUserIdx() 사용
         userService.updateProfile(getCurrentUserIdx(), dto);
         return ok();
     }
 
-    @DeleteMapping("/withdraw")
+    @DeleteMapping("/me")
     public ResponseEntity<ApiResponse<Void>> withdraw() {
         userService.withdraw(getCurrentUserIdx());
         return ok();

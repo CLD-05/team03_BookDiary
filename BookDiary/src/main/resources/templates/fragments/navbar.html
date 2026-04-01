@@ -1,25 +1,64 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <th:block th:fragment="navbar-main(active)">
+        <div class="d-flex flex-column-auto bg-white border-top w-100">
+            <div class="d-flex flex-row justify-content-around align-items-center w-100 py-2">
 
-<!-- active 값: home | diary | ai | friend | mypage -->
-<nav th:fragment="navbar(active)">
-  <div class="nav-bar">
-    <button class="nav-item" th:classappend="${active == 'home'}    ? ' active'" onclick="location.href='/'">
-      <span class="nav-icon">🏡</span>홈
-    </button>
-    <button class="nav-item" th:classappend="${active == 'diary'}   ? ' active'" onclick="location.href='/diary'">
-      <span class="nav-icon">📚</span>서재
-    </button>
-    <button class="nav-item" th:classappend="${active == 'ai'}      ? ' active'" onclick="location.href='/ai'">
-      <span class="nav-icon">✨</span>AI
-    </button>
-    <button class="nav-item" th:classappend="${active == 'friend'}  ? ' active'" onclick="location.href='/friends'">
-      <span class="nav-icon">👥</span>친구
-    </button>
-    <button class="nav-item" th:classappend="${active == 'mypage'}  ? ' active'" onclick="location.href='/mypage'">
-      <span class="nav-icon">👤</span>마이
-    </button>
-  </div>
-</nav>
+                <a href="/diary/diary"
+                   class="d-flex flex-column align-items-center gap-1 px-3 text-decoration-none">
+                    <i class="ki-duotone ki-home fs-2x"
+                       th:classappend="${active == 'home'} ? 'text-primary' : 'text-gray-600'">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                    <span class="fs-9"
+                          th:classappend="${active == 'home'} ? 'text-primary fw-semibold' : 'text-gray-600'">홈</span>
+                </a>
 
+                <a href="/highlight/highlight"
+                   class="d-flex flex-column align-items-center gap-1 px-3 text-decoration-none">
+                    <i class="ki-duotone ki-bookmark fs-2x"
+                       th:classappend="${active == 'bookmark'} ? 'text-primary' : 'text-gray-600'">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                    <span class="fs-9"
+                          th:classappend="${active == 'bookmark'} ? 'text-primary fw-semibold' : 'text-gray-600'">북마크</span>
+                </a>
+
+                <a href="#"
+                   class="d-flex flex-column align-items-center gap-1 px-3 text-decoration-none">
+                    <i class="ki-duotone ki-messages fs-2x"
+                       th:classappend="${active == 'ai'} ? 'text-primary' : 'text-gray-600'">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                    <span class="fs-9"
+                          th:classappend="${active == 'ai'} ? 'text-primary fw-semibold' : 'text-gray-600'">AI</span>
+                </a>
+
+                <a href="/mypage/mypage"
+                   class="d-flex flex-column align-items-center gap-1 px-3 text-decoration-none">
+                    <i class="ki-duotone ki-user fs-2x"
+                       th:classappend="${active == 'mypage'} ? 'text-primary' : 'text-gray-600'">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                    <span class="fs-9"
+                          th:classappend="${active == 'mypage'} ? 'text-primary fw-semibold' : 'text-gray-600'">마이</span>
+                </a>
+
+            </div>
+        </div>
+    </th:block>
+    
+    <!--플러스 버튼-->
+    <th:block th:fragment="btn-add(url)">
+        <a th:href="${url}"
+           class="btn btn-primary btn-icon w-50px h-50px rounded-circle shadow-lg position-fixed"
+           style="bottom: 80px; right: 20px; z-index: 999;">
+            <i class="ki-duotone ki-plus fs-2x">
+                <span class="path1"></span>
+            </i>
+        </a>
+    </th:block>
+</body>
 </html>

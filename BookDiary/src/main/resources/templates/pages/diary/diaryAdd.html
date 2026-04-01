@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>독서 기록 추가</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+	href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700">
+<link th:href="@{/plugins/global/plugins.bundle.css}" rel="stylesheet">
+<link th:href="@{/css/style.bundle.css}" rel="stylesheet">
+</head>
+
+<body>
+	<div class="d-flex flex-column flex-root" style="height: 100vh;">
+
+		<!--begin::Header-->
+		<div th:replace="~{fragments/header :: header-back('독서 기록 추가')}"></div>
+		<!--end::Header-->
+
+		<!--begin::Content-->
+		<div class="d-flex flex-column-fluid overflow-auto">
+			<div class="p-4 w-100 d-flex flex-column gap-4">
+
+				<!--책 검색-->
+				<div class="card shadow-sm">
+					<div class="card-body">
+
+						<!--검색란-->
+						<div class="position-relative">
+							<input type="text" id="searchInput"
+								class="form-control form-control-lg pe-10"
+								placeholder="책 제목을 검색하세요" oninput="handleSearch(this.value)">
+							<span
+								class="position-absolute top-50 end-0 translate-middle-y pe-3">
+								<i class="ki-duotone ki-magnifier fs-3 text-gray-400"> <span
+									class="path1"></span> <span class="path2"></span>
+							</i>
+							</span>
+						</div>
+
+						<!--검색 결과 리스트-->
+						<div id="searchResults" class="mt-3 d-flex flex-column gap-2"
+							style="display: none;"></div>
+
+					</div>
+				</div>
+
+				<!--선택된 책 정보 (책 선택 후 노출)-->
+				<div id="selectedBookCard" class="card shadow-sm d-none">
+					<div class="card-header">
+						<h3 class="card-title fs-6">선택된 책</h3>
+						<div class="card-toolbar">
+							<button type="button" class="btn btn-sm btn-icon btn-light"
+								onclick="clearSelectedBook()">
+								<i class="ki-duotone ki-cross fs-4"> <span class="path1"></span>
+									<span class="path2"></span>
+								</i>
+							</button>
+						</div>
+					</div>
+					<div class="card-body">
+						<div class="d-flex gap-3">
+							<img id="selectedImage" src="" class="rounded"
+								style="width: 60px; height: 85px; object-fit: cover;">
+							<div class="d-flex flex-column gap-1">
+								<span id="selectedTitle" class="fw-bold fs-6 text-gray-800"></span>
+								<span id="selectedAuthor" class="fs-7 text-gray-500"></span> <span
+									id="selectedPublisher" class="fs-8 text-gray-400"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!--독서 정보 폼 (책 선택 후 노출)-->
+				<div id="diaryForm" class="d-none d-flex flex-column gap-4">
+
+					<!--독서 상태-->
+					<div class="card shadow-sm">
+						<div class="card-header">
+							<h3 class="card-title fs-6">독서 상태</h3>
+						</div>
+						<div class="card-body d-flex gap-2">
+							<button type="button"
+								class="btn btn-sm btn-light-secondary flex-fill status-btn"
+								data-status="WANT" onclick="selectStatus(this)">🔖 읽고
+								싶어요</button>
+							<button type="button"
+								class="btn btn-sm btn-light-primary flex-fill status-btn active-status"
+								data-status="READING" onclick="selectStatus(this)">📖
+								읽는 중</button>
+							<button type="button"
+								class="btn btn-sm btn-light-secondary flex-fill status-btn"
+								data-status="DONE" onclick="selectStatus(this)">✅ 완독</button>
+						</div>
+					</div>
+
+					<!--독서 기간-->
+					<div class="card shadow-sm">
+						<div class="card-header">
+							<h3 class="card-title fs-6">독서 기간</h3>
+						</div>
+						<div class="card-body d-flex flex-column gap-3">
+							<div>
+								<label class="form-label fw-semibold text-gray-700 fs-7">시작일</label>
+								<input type="date" id="startDate" class="form-control">
+							</div>
+							<div>
+								<label class="form-label fw-semibold text-gray-700 fs-7">완료일</label>
+								<input type="date" id="endDate" class="form-control">
+							</div>
+						</div>
+					</div>
+
+					<!--별점-->
+					<div class="card shadow-sm">
+						<div class="card-header">
+							<h3 class="card-title fs-6">별점</h3>
+						</div>
+						<div class="card-body">
+							<div class="rating d-flex gap-2" id="ratingInput">
+								<div class="rating-label fs-2x" data-value="1"
+									onclick="selectRating(1)">
+									<i class="ki-duotone ki-star fs-2x"></i>
+								</div>
+								<div class="rating-label fs-2x" data-value="2"
+									onclick="selectRating(2)">
+									<i class="ki-duotone ki-star fs-2x"></i>
+								</div>
+								<div class="rating-label fs-2x" data-value="3"
+									onclick="selectRating(3)">
+									<i class="ki-duotone ki-star fs-2x"></i>
+								</div>
+								<div class="rating-label fs-2x" data-value="4"
+									onclick="selectRating(4)">
+									<i class="ki-duotone ki-star fs-2x"></i>
+								</div>
+								<div class="rating-label fs-2x" data-value="5"
+									onclick="selectRating(5)">
+									<i class="ki-duotone ki-star fs-2x"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!--메모-->
+					<div class="card shadow-sm">
+						<div class="card-header">
+							<h3 class="card-title fs-6">메모</h3>
+						</div>
+						<div class="card-body d-flex flex-column gap-3">
+							<div>
+								<label class="form-label fw-semibold text-gray-700 fs-7">제목</label>
+								<input type="text" id="memoTitle" class="form-control"
+									placeholder="메모 제목을 입력하세요">
+							</div>
+							<div>
+								<label class="form-label fw-semibold text-gray-700 fs-7">내용</label>
+								<textarea id="memoContent" class="form-control" rows="4"
+									placeholder="책에 대한 감상을 적어보세요"></textarea>
+							</div>
+						</div>
+					</div>
+
+					<!--즐겨찾기-->
+					<div class="card shadow-sm">
+						<div
+							class="card-body d-flex justify-content-between align-items-center">
+							<span class="fw-semibold fs-6 text-gray-700">❤️ 즐겨찾기</span>
+							<div class="form-check form-switch">
+								<input class="form-check-input" type="checkbox" id="favorite">
+							</div>
+						</div>
+					</div>
+
+					<!--저장 버튼-->
+					<button type="button" onclick="handleSave()"
+						class="btn btn-primary w-100 btn-lg">저장하기</button>
+
+				</div>
+				<!--end::diaryForm-->
+
+			</div>
+		</div>
+		<!--end::Content-->
+
+	</div>
+
+	<script th:src="@{/plugins/global/plugins.bundle.js}"></script>
+	<script th:src="@{/js/scripts.bundle.js}"></script>
+
+	<script>
+        let selectedBook = null;
+        let selectedStatus = 'READING';
+        let selectedRating = null;
+        let searchTimer = null;
+
+        function getToken() {
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+                const [key, val] = c.trim().split('=');
+                if (key === 'token') return val;
+            }
+            return null;
+        }
+
+        // 검색 (디바운스 300ms)
+        function handleSearch(keyword) {
+            clearTimeout(searchTimer);
+            const results = document.getElementById('searchResults');
+
+            if (!keyword.trim()) {
+                results.style.display = 'none';
+                results.innerHTML = '';
+                return;
+            }
+
+            searchTimer = setTimeout(() => {
+                fetch(`/api/books/search?keyword=${encodeURIComponent(keyword)}`, {
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                })
+                .then(res => res.json())
+                .then(res => {
+                    results.style.display = 'flex';
+                    results.innerHTML = '';
+
+                    if (!res.result || res.data.length === 0) {
+                        results.innerHTML = '<span class="fs-7 text-gray-400 text-center py-3">검색 결과가 없어요</span>';
+                        return;
+                    }
+
+                    res.data.forEach(book => {
+                        const item = document.createElement('div');
+                        item.className = 'card card-hover border cursor-pointer';
+                        item.style.cursor = 'pointer';
+                        item.innerHTML = `
+                            <div class="card-body py-3">
+                                <div class="d-flex gap-3 align-items-center">
+                                    <img src="${book.imageUrl || 'https://picsum.photos/40/55'}"
+                                         class="rounded"
+                                         style="width: 40px; height: 55px; object-fit: cover;">
+                                    <div class="d-flex flex-column gap-1">
+                                        <span class="fw-semibold fs-7 text-gray-800">${book.title}</span>
+                                        <span class="fs-8 text-gray-500">${book.author || ''} · ${book.publisher || ''}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        item.onclick = () => selectBook(book);
+                        results.appendChild(item);
+                    });
+                });
+            }, 300);
+        }
+
+     // 책 선택
+        function selectBook(book) {
+            selectedBook = book;
+
+            // 검색 결과 숨기기 - style 직접 제거하고 innerHTML 비우기
+            const results = document.getElementById('searchResults');
+            results.innerHTML = '';
+            results.removeAttribute('style');
+            results.style.display = 'none';
+
+            document.getElementById('searchInput').value = book.title;
+
+            // 선택된 책 카드 노출
+            document.getElementById('selectedImage').src = book.imageUrl || 'https://picsum.photos/60/85';
+            document.getElementById('selectedTitle').textContent = book.title;
+            document.getElementById('selectedAuthor').textContent = book.author || '';
+            document.getElementById('selectedPublisher').textContent = book.publisher || '';
+            document.getElementById('selectedBookCard').classList.remove('d-none');
+
+            // 폼 노출
+            document.getElementById('diaryForm').classList.remove('d-none');
+        }
+
+        // 책 선택 취소
+        function clearSelectedBook() {
+            selectedBook = null;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('selectedBookCard').classList.add('d-none');
+            document.getElementById('diaryForm').classList.add('d-none');
+        }
+
+        // 상태 선택
+        function selectStatus(btn) {
+            document.querySelectorAll('.status-btn').forEach(b => {
+                b.classList.remove('btn-light-primary', 'btn-light-success', 'btn-primary', 'btn-success');
+                b.classList.add('btn-light-secondary');
+            });
+            selectedStatus = btn.dataset.status;
+            btn.classList.remove('btn-light-secondary');
+            if (selectedStatus === 'READING') btn.classList.add('btn-light-primary');
+            else if (selectedStatus === 'DONE') btn.classList.add('btn-light-success');
+            else btn.classList.add('btn-light-secondary');
+        }
+
+        // 별점 선택
+        function selectRating(value) {
+            selectedRating = value;
+            document.querySelectorAll('#ratingInput .rating-label').forEach((star, idx) => {
+                if (idx < value) star.classList.add('checked');
+                else star.classList.remove('checked');
+            });
+        }
+
+        // 저장
+        function handleSave() {
+            if (!selectedBook) {
+                Swal.fire({
+                    text: "책을 먼저 선택해주세요.",
+                    icon: "warning",
+                    buttonsStyling: false,
+                    confirmButtonText: "확인",
+                    customClass: { confirmButton: "btn btn-primary" }
+                });
+                return;
+            }
+
+            const data = {
+                isbn: selectedBook.isbn,
+                title: selectedBook.title,
+                author: selectedBook.author,
+                publisher: selectedBook.publisher,
+                imageUrl: selectedBook.imageUrl,
+                status: selectedStatus,
+                startDate: document.getElementById('startDate').value || null,
+                endDate: document.getElementById('endDate').value || null,
+                rating: selectedRating,
+                favorite: document.getElementById('favorite').checked,
+                memoTitle: document.getElementById('memoTitle').value || null,
+                memoContent: document.getElementById('memoContent').value || null
+            };
+
+            fetch('/api/diary', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getToken()
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.result) {
+                    Swal.fire({
+                        text: "독서 기록이 저장되었습니다!",
+                        icon: "success",
+                        buttonsStyling: false,
+                        confirmButtonText: "확인",
+                        customClass: { confirmButton: "btn btn-primary" }
+                    }).then(() => {
+                        location.href = '/diary/home';
+                    });
+                } else {
+                    Swal.fire({
+                        text: res.message,
+                        icon: "error",
+                        buttonsStyling: false,
+                        confirmButtonText: "확인",
+                        customClass: { confirmButton: "btn btn-danger" }
+                    });
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

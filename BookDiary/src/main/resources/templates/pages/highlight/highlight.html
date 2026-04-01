@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>하이라이트</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700">
+<link th:href="@{/plugins/global/plugins.bundle.css}" rel="stylesheet">
+<link th:href="@{/css/style.bundle.css}" rel="stylesheet">
+<style>
+    html, body { height: 100%; overflow: hidden; }
+    #scrollContainer { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+</style>
+</head>
+
+<body>
+    <div class="d-flex flex-column" style="height: 100vh;">
+
+        <div th:replace="~{fragments/header :: header-main}"></div>
+
+        <div id="scrollContainer" class="flex-grow-1" style="overflow-y: auto;">
+            <div class="p-4 w-100 d-flex flex-column gap-3">
+
+                <input type="hidden" id="hasNextValue" th:value="${hasNext}">
+
+                <!--없을 때-->
+                <div th:if="${#lists.isEmpty(highlightList)}"
+                     class="d-flex flex-column align-items-center justify-content-center gap-3 py-20">
+                    <i class="ki-duotone ki-bookmarks fs-5x text-gray-300">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                    <span class="fs-5 fw-semibold text-gray-500">저장된 대사가 없어요</span>
+                    <span class="fs-7 text-gray-400">기억하고 싶은 문장을 추가해보세요!</span>
+                </div>
+
+                <!--하이라이트 목록-->
+                <div id="highlightList" class="d-flex flex-column gap-3">
+                    <div th:each="highlight : ${highlightList}" class="card shadow-sm"
+                         th:onclick="|location.href='/highlight/detail?highlightId=${highlight.highlightId}'|"
+                         style="cursor: pointer;">
+                        <div class="card-body">
+                            <div class="d-flex flex-column gap-2">
+                                <span class="fs-8 text-gray-400 fw-semibold"
+                                      th:text="${highlight.bookTitle}"></span>
+                                <span th:if="${highlight.pageNumber != null}"
+                                      class="fs-9 text-gray-400"
+                                      th:text="'p. ' + ${highlight.pageNumber}"></span>
+                                <p class="fs-6 text-gray-800 mb-0 lh-lg"
+                                   th:text="'&quot;' + ${highlight.highlightText} + '&quot;'"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--로딩 스피너-->
+                <div id="loadingSpinner" class="d-flex justify-content-center py-4 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <div style="height: 1px;"></div>
+
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/navbar :: navbar-main('bookmark')}"></div>
+
+    </div>
+
+    <div th:replace="~{fragments/navbar :: btn-add('/highlight/add')}"></div>
+
+    <script th:src="@{/plugins/global/plugins.bundle.js}"></script>
+    <script th:src="@{/js/scripts.bundle.js}"></script>
+
+    <script>
+    function getToken() {
+        const cookies = document.cookie.split(';');
+        for (let c of cookies) {
+            const [key, val] = c.trim().split('=');
+            if (key === 'token') return val;
+        }
+        return null;
+    }
+
+    if (!getToken()) location.href = '/publishing/login';
+
+    let currentPage = 2;
+    let isLoading = false;
+    let hasNext = document.getElementById('hasNextValue').value === 'true';
+
+    function loadMoreHighlights() {
+        if (isLoading || !hasNext) return;
+        isLoading = true;
+
+        document.getElementById('loadingSpinner').classList.remove('d-none');
+
+        fetch(`/api/highlights/all?page=${currentPage}`, {
+            headers: { 'Authorization': 'Bearer ' + getToken() }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (!res.result) return;
+
+            const list = document.getElementById('highlightList');
+            res.data.forEach(h => {
+                const item = document.createElement('div');
+                item.className = 'card shadow-sm';
+                item.style.cursor = 'pointer';
+                item.onclick = () => location.href = `/highlight/detail?highlightId=${h.highlightId}`;
+                item.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex flex-column gap-2">
+                            <span class="fs-8 text-gray-400 fw-semibold">${h.bookTitle || ''}</span>
+                            ${h.pageNumber ? `<span class="fs-9 text-gray-400">p. ${h.pageNumber}</span>` : ''}
+                            <p class="fs-6 text-gray-800 mb-0 lh-lg">"${h.highlightText}"</p>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+
+            hasNext = res.pagePos < res.pageCnt;
+            currentPage++;
+        })
+        .finally(() => {
+            isLoading = false;
+            document.getElementById('loadingSpinner').classList.add('d-none');
+        });
+    }
+
+    const scrollContainer = document.getElementById('scrollContainer');
+    scrollContainer.addEventListener('scroll', function() {
+        const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+        if (scrollTop + clientHeight >= scrollHeight - 100) {
+            loadMoreHighlights();
+        }
+    });
+    </script>
+
+</body>
+</html>

@@ -3,8 +3,7 @@ package com.example.diary.highlight.dto;
 import lombok.Getter;
 
 @Getter
-public class HighlightRequestDto {
-    private Long diaryId;
+public class HighlightUpdateRequestDto {
     private Integer pageNumber;
     private String highlightText;
 }

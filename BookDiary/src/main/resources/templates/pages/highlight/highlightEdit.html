@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>하이라이트 수정</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700">
+<link th:href="@{/plugins/global/plugins.bundle.css}" rel="stylesheet">
+<link th:href="@{/css/style.bundle.css}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="d-flex flex-column flex-root" style="height: 100vh;">
+
+        <div th:replace="~{fragments/header :: header-back('하이라이트 수정')}"></div>
+
+        <div class="d-flex flex-column-fluid overflow-auto">
+            <div class="p-4 w-100 d-flex flex-column gap-4">
+
+                <!--책 정보-->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex gap-3 align-items-center">
+                            <img id="bookImage" src="" class="rounded"
+                                 style="width: 50px; height: 70px; object-fit: cover;">
+                            <div class="d-flex flex-column gap-1">
+                                <span id="bookTitle" class="fw-bold fs-6 text-gray-800"></span>
+                                <span id="bookAuthor" class="fs-7 text-gray-500"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--수정 폼-->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title fs-6">대사 수정</h3>
+                    </div>
+                    <div class="card-body d-flex flex-column gap-3">
+                        <div>
+                            <label class="form-label fw-semibold text-gray-700 fs-7">페이지</label>
+                            <input type="number" id="pageNumber" class="form-control"
+                                   placeholder="페이지 번호 (선택)">
+                        </div>
+                        <div>
+                            <label class="form-label fw-semibold text-gray-700 fs-7">
+                                대사 <span class="text-danger">*</span>
+                            </label>
+                            <textarea id="highlightText" class="form-control" rows="4"
+                                      placeholder="기억하고 싶은 문장을 입력하세요"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!--저장 버튼-->
+                <button type="button" onclick="handleSave()"
+                        class="btn btn-primary w-100 btn-lg">
+                    수정 완료
+                </button>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script th:src="@{/plugins/global/plugins.bundle.js}"></script>
+    <script th:src="@{/js/scripts.bundle.js}"></script>
+
+    <script>
+        const highlightId = new URLSearchParams(location.search).get('highlightId');
+
+        function getToken() {
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+                const [key, val] = c.trim().split('=');
+                if (key === 'token') return val;
+            }
+            return null;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = getToken();
+            if (!token) {
+                location.href = '/publishing/login';
+                return;
+            }
+
+            fetch(`/api/highlights/${highlightId}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (!res.result) {
+                    history.back();
+                    return;
+                }
+
+                const h = res.data;
+                document.getElementById('bookImage').src = h.bookImageUrl || 'https://picsum.photos/50/70';
+                document.getElementById('bookTitle').textContent = h.bookTitle || '';
+                document.getElementById('bookAuthor').textContent = h.bookAuthor || '';
+                if (h.pageNumber) document.getElementById('pageNumber').value = h.pageNumber;
+                document.getElementById('highlightText').value = h.highlightText;
+            });
+        });
+
+        function handleSave() {
+            const text = document.getElementById('highlightText').value;
+            if (!text.trim()) {
+                Swal.fire({
+                    text: "대사를 입력해주세요.",
+                    icon: "warning",
+                    buttonsStyling: false,
+                    confirmButtonText: "확인",
+                    customClass: { confirmButton: "btn btn-primary" }
+                });
+                return;
+            }
+
+            fetch(`/api/highlights/${highlightId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getToken()
+                },
+                body: JSON.stringify({
+                    pageNumber: document.getElementById('pageNumber').value || null,
+                    highlightText: text
+                })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.result) {
+                    Swal.fire({
+                        text: "수정되었습니다!",
+                        icon: "success",
+                        buttonsStyling: false,
+                        confirmButtonText: "확인",
+                        customClass: { confirmButton: "btn btn-primary" }
+                    }).then(() => {
+                        location.href = `/highlight/detail?highlightId=${highlightId}`;
+                    });
+                } else {
+                    Swal.fire({
+                        text: res.message,
+                        icon: "error",
+                        buttonsStyling: false,
+                        confirmButtonText: "확인",
+                        customClass: { confirmButton: "btn btn-danger" }
+                    });
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

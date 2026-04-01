@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 public abstract class BaseController {
 
-    protected static final int ROW_CNT = 10;
+    protected static final int ROW_CNT = 5;
 
     @Autowired
     protected UserRepository userRepository;

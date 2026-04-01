@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>독서 기록 수정</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700">
+<link th:href="@{/plugins/global/plugins.bundle.css}" rel="stylesheet">
+<link th:href="@{/css/style.bundle.css}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="d-flex flex-column flex-root" style="height: 100vh;">
+
+        <!--begin::Header-->
+        <div th:replace="~{fragments/header :: header-back('독서 기록 수정')}"></div>
+        <!--end::Header-->
+
+        <!--begin::Content-->
+        <div class="d-flex flex-column-fluid overflow-auto">
+            <div class="p-4 w-100 d-flex flex-column gap-4">
+
+                <!--선택된 책 정보-->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex gap-3">
+                            <img id="selectedImage" src="" class="rounded"
+                                 style="width: 60px; height: 85px; object-fit: cover;">
+                            <div class="d-flex flex-column gap-1">
+                                <span id="selectedTitle" class="fw-bold fs-6 text-gray-800"></span>
+                                <span id="selectedAuthor" class="fs-7 text-gray-500"></span>
+                                <span id="selectedPublisher" class="fs-8 text-gray-400"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--독서 상태-->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title fs-6">독서 상태</h3>
+                    </div>
+                    <div class="card-body d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-light-secondary flex-fill status-btn"
+                                data-status="WANT" onclick="selectStatus(this)">🔖 읽고 싶어요</button>
+                        <button type="button" class="btn btn-sm btn-light-secondary flex-fill status-btn"
+                                data-status="READING" onclick="selectStatus(this)">📖 읽는 중</button>
+                        <button type="button" class="btn btn-sm btn-light-secondary flex-fill status-btn"
+                                data-status="DONE" onclick="selectStatus(this)">✅ 완독</button>
+                    </div>
+                </div>
+
+                <!--독서 기간-->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title fs-6">독서 기간</h3>
+                    </div>
+                    <div class="card-body d-flex flex-column gap-3">
+                        <div>
+                            <label class="form-label fw-semibold text-gray-700 fs-7">시작일</label>
+                            <input type="date" id="startDate" class="form-control">
+                        </div>
+                        <div>
+                            <label class="form-label fw-semibold text-gray-700 fs-7">완료일</label>
+                            <input type="date" id="endDate" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <!--별점-->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title fs-6">별점</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="rating d-flex gap-2" id="ratingInput">
+                            <div class="rating-label fs-2x" data-value="1" onclick="selectRating(1)">
+                                <i class="ki-duotone ki-star fs-2x"></i>
+                            </div>
+                            <div class="rating-label fs-2x" data-value="2" onclick="selectRating(2)">
+                                <i class="ki-duotone ki-star fs-2x"></i>
+                            </div>
+                            <div class="rating-label fs-2x" data-value="3" onclick="selectRating(3)">
+                                <i class="ki-duotone ki-star fs-2x"></i>
+                            </div>
+                            <div class="rating-label fs-2x" data-value="4" onclick="selectRating(4)">
+                                <i class="ki-duotone ki-star fs-2x"></i>
+                            </div>
+                            <div class="rating-label fs-2x" data-value="5" onclick="selectRating(5)">
+                                <i class="ki-duotone ki-star fs-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--메모-->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title fs-6">메모</h3>
+                    </div>
+                    <div class="card-body d-flex flex-column gap-3">
+                        <div>
+                            <label class="form-label fw-semibold text-gray-700 fs-7">제목</label>
+                            <input type="text" id="memoTitle" class="form-control"
+                                   placeholder="메모 제목을 입력하세요">
+                        </div>
+                        <div>
+                            <label class="form-label fw-semibold text-gray-700 fs-7">내용</label>
+                            <textarea id="memoContent" class="form-control" rows="4"
+                                      placeholder="책에 대한 감상을 적어보세요"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!--즐겨찾기-->
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold fs-6 text-gray-700">❤️ 즐겨찾기</span>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="favorite">
+                        </div>
+                    </div>
+                </div>
+
+                <!--저장 버튼-->
+                <button type="button" onclick="handleSave()"
+                        class="btn btn-primary w-100 btn-lg">
+                    수정 완료
+                </button>
+
+            </div>
+        </div>
+        <!--end::Content-->
+
+    </div>
+
+    <script th:src="@{/plugins/global/plugins.bundle.js}"></script>
+    <script th:src="@{/js/scripts.bundle.js}"></script>
+
+    <script>
+        const diaryId = location.pathname.split('/').pop();
+        let selectedStatus = 'READING';
+        let selectedRating = null;
+
+        function getToken() {
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+                const [key, val] = c.trim().split('=');
+                if (key === 'token') return val;
+            }
+            return null;
+        }
+
+        // 기존 데이터 불러오기
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = getToken();
+            if (!token) {
+                location.href = '/publishing/login';
+                return;
+            }
+
+            fetch(`/api/diary/${diaryId}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (!res.result) {
+                    history.back();
+                    return;
+                }
+
+                const d = res.data;
+
+                // 책 정보 채우기
+                document.getElementById('selectedImage').src = d.imageUrl || 'https://picsum.photos/60/85';
+                document.getElementById('selectedTitle').textContent = d.title;
+                document.getElementById('selectedAuthor').textContent = d.author || '';
+                document.getElementById('selectedPublisher').textContent = d.publisher || '';
+
+                // 상태 버튼 활성화
+                selectedStatus = d.status;
+                document.querySelectorAll('.status-btn').forEach(btn => {
+                    btn.classList.remove('btn-light-primary', 'btn-light-success');
+                    btn.classList.add('btn-light-secondary');
+                    if (btn.dataset.status === d.status) {
+                        btn.classList.remove('btn-light-secondary');
+                        if (d.status === 'READING') btn.classList.add('btn-light-primary');
+                        else if (d.status === 'DONE') btn.classList.add('btn-light-success');
+                    }
+                });
+
+                // 날짜 채우기
+                if (d.startDate) document.getElementById('startDate').value = d.startDate;
+                if (d.endDate) document.getElementById('endDate').value = d.endDate;
+
+                // 별점 채우기
+                if (d.rating) selectRating(d.rating);
+
+                // 메모 채우기
+                if (d.memoTitle) document.getElementById('memoTitle').value = d.memoTitle;
+                if (d.memoContent) document.getElementById('memoContent').value = d.memoContent;
+
+                // 즐겨찾기
+                document.getElementById('favorite').checked = d.favorite || false;
+            });
+        });
+
+        // 상태 선택
+        function selectStatus(btn) {
+            document.querySelectorAll('.status-btn').forEach(b => {
+                b.classList.remove('btn-light-primary', 'btn-light-success');
+                b.classList.add('btn-light-secondary');
+            });
+            selectedStatus = btn.dataset.status;
+            btn.classList.remove('btn-light-secondary');
+            if (selectedStatus === 'READING') btn.classList.add('btn-light-primary');
+            else if (selectedStatus === 'DONE') btn.classList.add('btn-light-success');
+        }
+
+        // 별점 선택
+        function selectRating(value) {
+            selectedRating = value;
+            document.querySelectorAll('#ratingInput .rating-label').forEach((star, idx) => {
+                if (idx < value) star.classList.add('checked');
+                else star.classList.remove('checked');
+            });
+        }
+
+        // 수정 저장
+        function handleSave() {
+            const data = {
+                status: selectedStatus,
+                startDate: document.getElementById('startDate').value || null,
+                endDate: document.getElementById('endDate').value || null,
+                rating: selectedRating,
+                favorite: document.getElementById('favorite').checked,
+                memoTitle: document.getElementById('memoTitle').value || null,
+                memoContent: document.getElementById('memoContent').value || null
+            };
+
+            fetch(`/api/diary/${diaryId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getToken()
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.result) {
+                    Swal.fire({
+                        text: "수정되었습니다!",
+                        icon: "success",
+                        buttonsStyling: false,
+                        confirmButtonText: "확인",
+                        customClass: { confirmButton: "btn btn-primary" }
+                    }).then(() => {
+                        location.href = `/diary/detail/${diaryId}`;
+                    });
+                } else {
+                    Swal.fire({
+                        text: res.message,
+                        icon: "error",
+                        buttonsStyling: false,
+                        confirmButtonText: "확인",
+                        customClass: { confirmButton: "btn btn-danger" }
+                    });
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

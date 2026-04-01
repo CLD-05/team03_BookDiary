@@ -26,7 +26,6 @@ public class CreateDiaryRequest {
     private String publisher;
     private String category;
     private String imageUrl;
-    private Integer totalPage;
     private LocalDate publishDate;
 
     // diary 정보

@@ -68,7 +68,6 @@ public class DiaryService {
                 .publisher(request.getPublisher())
                 .category(request.getCategory())
                 .imageUrl(request.getImageUrl())
-                .totalPage(request.getTotalPage())
                 .publishDate(request.getPublishDate())
                 .build();
 

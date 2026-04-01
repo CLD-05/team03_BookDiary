@@ -50,4 +50,8 @@ public class TbUser {
     public enum Status {
         ACTIVE, SUSPENDED
     }
+
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
 }

@@ -1,15 +1,15 @@
 package com.example.diary.user.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tbUser")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class TbUser {
 
     @Id
@@ -43,11 +43,19 @@ public class TbUser {
     @Column(name = "UpdateDate")
     private LocalDateTime updateDate;
 
-    public enum Role {
-        ROLE_USER, ROLE_ADMIN
+    public enum Role { ROLE_USER, ROLE_ADMIN }
+    public enum Status { ACTIVE, SUSPENDED }
+
+    // 정보 수정 메서드
+    public void updateProfile(String name, String email) {
+        this.name = name;
+        this.email = email;
+        this.updateDate = LocalDateTime.now();
     }
 
-    public enum Status {
-        ACTIVE, SUSPENDED
+    // 비밀번호 변경 메서드
+    public void updatePassword(String newEncodedPass) {
+        this.pass = newEncodedPass;
+        this.updateDate = LocalDateTime.now();
     }
 }

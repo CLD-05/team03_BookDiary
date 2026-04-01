@@ -39,7 +39,9 @@ public class SecurityConfig {
                     "/api/auth/findPass",
                         "/auth/**",       // 회원가입/로그인 '페이지' 접근 허용 (임시)
                         "/api/auth/**",    // 회원가입/로그인 'API' 처리 허용 (임시)
-                        "/mypage"      // mypage (임시)
+                        "/mypage",      // mypage (임시)
+                        "/api/books/search", // 책검색(임시)
+                        "/api/diary/**" // 서재 관련(임시)
                 ).permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     // api 테스트 코드

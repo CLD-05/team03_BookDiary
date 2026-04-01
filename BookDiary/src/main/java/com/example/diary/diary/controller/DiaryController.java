@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/diary")
@@ -30,5 +32,24 @@ public class DiaryController extends BaseController {
 
         DiaryResponseDto response = diaryService.createDiary(userIdx, request);
         return ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<DiaryResponseDto>>> getDiaryList() {
+        Long userIdx = 1L;
+        return ok(diaryService.getDiaryList(userIdx));
+    }
+
+    @GetMapping("/{diaryId}")
+    public ResponseEntity<ApiResponse<DiaryResponseDto>> getDiaryDetail(@PathVariable Long diaryId) {
+        Long userIdx = 1L;
+        return ok(diaryService.getDiaryDetail(userIdx, diaryId));
+    }
+
+    @DeleteMapping("/{diaryId}")
+    public ResponseEntity<ApiResponse<Void>> deleteDiary(@PathVariable Long diaryId) {
+        Long userIdx = 1L;
+        diaryService.deleteDiary(userIdx, diaryId);
+        return ok(null);
     }
 }

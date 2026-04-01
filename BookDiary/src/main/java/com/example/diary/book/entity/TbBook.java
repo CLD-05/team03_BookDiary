@@ -36,9 +36,6 @@ public class TbBook {
     @Column(name = "ImageURL", length = 500)
     private String imageUrl;
 
-    @Column(name = "TotalPage")
-    private Integer totalPage;
-
     @Column(name = "PublishDate")
     private LocalDate publishDate;
 }

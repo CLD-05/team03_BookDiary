@@ -48,4 +48,13 @@ public class TbAiLog {
     public void prePersist() {
         this.createDate = LocalDateTime.now();
     }
+
+    @Column(name = "PromptTokens")
+    private Integer promptTokens;
+
+    @Column(name = "CompletionTokens")
+    private Integer completionTokens;
+
+    @Column(name = "TotalTokens")
+    private Integer totalTokens;
 }

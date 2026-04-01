@@ -58,4 +58,8 @@ public class TbUser {
         this.pass = newEncodedPass;
         this.updateDate = LocalDateTime.now();
     }
+
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
 }

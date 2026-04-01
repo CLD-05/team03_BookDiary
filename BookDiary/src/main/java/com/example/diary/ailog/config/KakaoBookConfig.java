@@ -8,13 +8,8 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class KakaoBookConfig {
 
-    @Value("${kakao.api-key}")
+    @Value("${kakao.api.rest-key}")
     private String kakaoApiKey;
-
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
 
     public String getKakaoApiKey() {
         return kakaoApiKey;

@@ -13,7 +13,7 @@ import java.util.Map;
 @Entity
 @Table(name = "tbAiLog")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 public class TbAiLog {
@@ -29,15 +29,10 @@ public class TbAiLog {
     @JoinColumn(name = "Idx_User", nullable = false)
     private TbUser user;
 
-    // Idx_User2 - NOT NULL, tbUser FK
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Idx_User2", nullable = false)
-    private TbUser user2;
-
     // Idx_Book - NOT NULL, tbBook FK
-    /*@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Idx_Book", nullable = false)
-    private TbBook idxBook;*/
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Idx_Book")
+    private TbBook book;
 
     @Column(name = "PromptSummary", columnDefinition = "TEXT")
     private String promptSummary;

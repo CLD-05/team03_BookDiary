@@ -1,0 +1,27 @@
+### 로그인
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "userId": "testuser",
+  "pass": "test1234"
+}
+
+### AI 줄거리 요약
+POST http://localhost:8080/api/ai/summary
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlciIsInJvbGUiOiJST0xFX1VTRVIiLCJpYXQiOjE3NzUwMjkwNTQsImV4cCI6MTc3NTExNTQ1NH0.sHYiiEmKtOyageZNizklCTonNQFFWRPO4Zqw5CaRGNo
+
+{
+  "title": "해리포터",
+  "author": "JK롤링"
+}
+
+### AI 책 추천
+POST http://localhost:8080/api/ai/recommend
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlciIsInJvbGUiOiJST0xFX1VTRVIiLCJpYXQiOjE3NzUwMjkwNTQsImV4cCI6MTc3NTExNTQ1NH0.sHYiiEmKtOyageZNizklCTonNQFFWRPO4Zqw5CaRGNo
+
+{
+  "category": "소설"
+}

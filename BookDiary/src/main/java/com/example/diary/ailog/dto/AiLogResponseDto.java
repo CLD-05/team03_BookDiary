@@ -6,6 +6,9 @@ import lombok.Getter;
 import java.util.List;
 
 // AI 추천 응답
+@Getter
+@AllArgsConstructor
+@Builder
 public class AiLogResponseDto {
     private List<BookItem> books;
 

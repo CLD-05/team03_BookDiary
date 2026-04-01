@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class KakaoBookSearchResponse {
 
     private Meta meta;
@@ -11,9 +12,9 @@ public class KakaoBookSearchResponse {
 
     @Getter
     public static class Meta {
-        private boolean is_end;
-        private int pageable_count;
-        private int total_count;
+        private boolean is_end; // 마지막 페이지 여부
+        private int pageable_count; // 노출 가능한 총 개수
+        private int total_count; // 전체 검색 결과 수
     }
 
     @Getter

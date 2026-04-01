@@ -20,7 +20,7 @@ public class TbDiary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Idx_Diary")
-    private Long id;
+    private Long idxDiary;
 
     @Column(name = "StartDate")
     private LocalDate startDate;

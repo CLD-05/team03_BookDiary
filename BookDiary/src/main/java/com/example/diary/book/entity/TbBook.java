@@ -16,7 +16,7 @@ public class TbBook {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Idx_Book")
-    private Long id;
+    private Long idxBook;
 
     @Column(name = "Isbn", nullable = false, length = 20, unique = true)
     private String isbn;

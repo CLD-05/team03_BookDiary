@@ -36,6 +36,8 @@ public class SecurityConfig {
                     "/api/auth/findPass"
                 ).permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                    // api 테스트 코드
+                    .requestMatchers("/test/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(

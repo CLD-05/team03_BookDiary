@@ -32,9 +32,7 @@ public class UserService {
         userRepository.save(dto.toEntity(passwordEncoder.encode(dto.getPass())));
     }
 
-    /**
-     * 로그인 로직: 아이디 존재 여부와 비밀번호 일치 여부를 구분하여 처리
-     */
+
     public String login(LoginRequestDto dto) {
         // 1. 아이디로 유저 조회 (없으면 '존재하지 않는 아이디' 예외 발생)
         TbUser user = userRepository.findByUserId(dto.getUserId())
@@ -62,8 +60,11 @@ public class UserService {
         // 2. 이름 및 이메일 수정
         user.updateProfile(dto.getName(), dto.getEmail());
 
-        // 3. 새 비밀번호 입력 시에만 비밀번호 변경 처리
+        // 3. 기존 비밀번호와 새 비밀번호 일치하는지 비교
         if (dto.getNewPass() != null && !dto.getNewPass().isBlank()) {
+            if (passwordEncoder.matches(dto.getNewPass(), user.getPass())) {
+                throw CustomException.badRequest("기존 비밀번호와 동일합니다.");
+            }
             user.updatePassword(passwordEncoder.encode(dto.getNewPass()));
         }
     }

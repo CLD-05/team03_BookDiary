@@ -1,13 +1,22 @@
 package com.example.diary.user.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class UserUpdateDto {
-    private String name;        // 수정할 이름
-    private String email;       // 수정할 이메일
-    private String currentPass; // 본인 확인을 위한 현재 비밀번호 (필수)
-    private String newPass;     // 변경할 새 비밀번호 (선택)
+    @NotBlank(message = "이름은 필수 항목입니다.")
+    private String name;
+
+    @Email(message = "올바른 이메일 형식이 아닙니다.")
+    @NotBlank(message = "이메일은 필수 항목입니다.")
+    private String email;
+
+    @NotBlank(message = "현재 비밀번호를 입력해주세요.")
+    private String currentPass;
+
+    private String newPass; // 선택 사항
 }

@@ -8,6 +8,7 @@ import com.example.diary.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 @RestController // API용이므로 RestController 사용
 @RequestMapping("/api/auth")
@@ -18,9 +19,9 @@ public class AuthApiController extends BaseController {
 
     // Postman에서 요청한 그 주소를 처리하는 메서드
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<Void>> signup(@RequestBody SignupRequestDto dto) {
+    public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody SignupRequestDto dto) { // @Valid 추가!
         userService.signup(dto);
-        return ok(); // BaseController의 ok() 메서드 사용
+        return ok();
     }
 
     @PostMapping("/login")

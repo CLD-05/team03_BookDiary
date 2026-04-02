@@ -5,6 +5,7 @@ import com.example.diary.common.dto.ApiResponse;
 import com.example.diary.user.dto.UserResponseDto;
 import com.example.diary.user.dto.UserUpdateDto;
 import com.example.diary.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class UserController extends BaseController {
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<ApiResponse<Void>> updateProfile(@RequestBody UserUpdateDto dto) {
+    public ResponseEntity<ApiResponse<Void>> updateProfile(@Valid @RequestBody UserUpdateDto dto) {
         userService.updateProfile(getCurrentUserIdx(), dto);
         return ok();
     }

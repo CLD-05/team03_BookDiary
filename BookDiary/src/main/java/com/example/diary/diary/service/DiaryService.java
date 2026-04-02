@@ -66,6 +66,13 @@ public class DiaryService {
 		TbDiary diary = diaryRepository.findByIdxDiaryAndUser_IdxUser(diaryId, userIdx)
 				.orElseThrow(() -> CustomException.notFound("서재 정보를 찾을 수 없습니다."));
 
+		// 날짜 유효성 검사 추가
+		if (request.getStartDate() != null && request.getEndDate() != null) {
+			if (request.getEndDate().isBefore(request.getStartDate())) {
+				throw CustomException.badRequest("완료일은 시작일보다 이전일 수 없습니다.");
+			}
+		}
+
 		diary.update(request.getStatus(), request.getStartDate(), request.getEndDate(), request.getRating(),
 				request.getFavorite(), request.getMemoTitle(), request.getMemoContent());
 

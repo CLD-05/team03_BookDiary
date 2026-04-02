@@ -228,6 +228,14 @@
 
         // 수정 저장
         function handleSave() {
+            const startDate = document.getElementById('startDate').value || null;
+            const endDate = document.getElementById('endDate').value || null;
+
+            // 날짜 유효성 검사
+            if (startDate && endDate && endDate < startDate) {
+                alert('완료일은 시작일보다 이전일 수 없습니다.');
+                return;
+            }
             const data = {
                 status: selectedStatus,
                 startDate: document.getElementById('startDate').value || null,

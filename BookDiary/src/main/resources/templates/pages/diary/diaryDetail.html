@@ -184,7 +184,7 @@
                 document.getElementById('bookTitle').textContent = d.title;
                 document.getElementById('bookAuthor').textContent =
                     d.author + (d.publisher ? ' · ' + d.publisher : '');
-                document.getElementById('bookCategory').textContent = d.category || '';
+                // document.getElementById('bookCategory').textContent = d.category || '';
 
                 // 상태 뱃지
                 const statusBadge = document.getElementById('statusBadge');
@@ -225,6 +225,8 @@
                 } else {
                     document.getElementById('memoCard').style.display = 'none';
                 }
+
+				loadHighlightPreview();
             });
         });
 
@@ -268,7 +270,7 @@
         
      // 하이라이트 미리보기 (최대 2개)
         function loadHighlightPreview() {
-        	document.getElementById('highlightLink').href = `/diary/highlight?diaryId=${diaryId}`;
+        	document.getElementById('highlightLink').href = `/highlight/highlight?diaryId=${diaryId}`;
 
             fetch(`/api/highlights?diaryId=${diaryId}`, {
                 headers: { 'Authorization': 'Bearer ' + getToken() }
@@ -294,6 +296,7 @@
                 });
             });
         }
+
     </script>
 
 </body>

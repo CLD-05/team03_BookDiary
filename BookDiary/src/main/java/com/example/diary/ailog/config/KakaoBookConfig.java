@@ -7,10 +7,9 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class KakaoBookConfig {
-
     @Value("${kakao.api.rest-key}")
     private String kakaoApiKey;
-
+    
     public String getKakaoApiKey() {
         return kakaoApiKey;
     }

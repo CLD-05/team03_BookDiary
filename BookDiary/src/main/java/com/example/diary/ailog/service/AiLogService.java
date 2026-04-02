@@ -74,6 +74,8 @@ public class AiLogService {
                 선호 카테고리: %s
                 
                 위 독서 이력과 카테고리를 바탕으로 책 5권을 추천해줘.
+                반드시 한국 서점(교보문고, 예스24 등)에서 구매 가능한 책만 추천해줘.
+                한국어로 번역 출판된 책이나 한국 작가의 책을 우선 추천해줘.
                 추천 이유는 사용자의 독서 이력을 언급해서 3줄 이상의 분량으로 작성해줘.
                 반드시 아래 JSON 형식으로만 응답해줘. 다른 텍스트 없이 JSON만:
                 {"recommendations": [{"title": "책 제목", "author": "저자", "reason": "추천 이유"}]}
@@ -84,28 +86,53 @@ public class AiLogService {
                 .call()
                 .content();
 
-        List<AiLogResponseDto.BookItem> verifiedBooks = new ArrayList<>();
+        log.info("Gemini 추천 응답: {}", response);
+
+        List<AiLogResponseDto.BookItem> books = new ArrayList<>();
         try {
             String cleaned = response.replaceAll("```json|```", "").trim();
             Map<String, Object> result = objectMapper.readValue(cleaned, Map.class);
             List<Map<String, String>> recommendations =
                     (List<Map<String, String>>) result.get("recommendations");
 
-            for (Map<String, String> rec : recommendations) {
-                AiLogResponseDto.BookItem verified = bookSearchService.verifyAndEnrichBook(
-                        rec.get("title"), rec.get("author"), rec.get("reason"));
-                if (verified != null) {
-                    verifiedBooks.add(verified);
+            if (recommendations != null) {
+                for (Map<String, String> rec : recommendations) {
+                    String title = rec.get("title");
+                    String author = rec.get("author");
+                    String reason = rec.get("reason");
+
+                    log.info("추천 책 처리 중: {} - {}", title, author);
+
+                    // 카카오 교차검증 시도
+                    AiLogResponseDto.BookItem verified =
+                            bookSearchService.verifyAndEnrichBook(title, author, reason);
+
+                    if (verified != null) {
+                        log.info("카카오 검증 성공: {}", title);
+                        books.add(verified);
+                    } else {
+                        log.info("카카오 검증 실패, Gemini 결과 사용: {}", title);
+                        books.add(AiLogResponseDto.BookItem.builder()
+                                .title(title)
+                                .author(author)
+                                .publisher(null)
+                                .isbn(null)
+                                .imageUrl(null)
+                                .reason(reason)
+                                .build());
+                    }
                 }
             }
         } catch (Exception e) {
             log.error("추천 파싱 실패: {}", e.getMessage());
         }
 
-        saveAiLog(user, null, prompt, Map.of("recommendations", verifiedBooks));
+        log.info("최종 추천 결과 수: {}", books.size());
+
+        saveAiLog(user, null, prompt, Map.of("recommendations", books));
 
         return AiLogResponseDto.builder()
-                .books(verifiedBooks)
+                .books(books)
                 .build();
     }
 

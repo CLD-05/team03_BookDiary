@@ -18,7 +18,6 @@ public class DiaryResponseDto {
     private String title;
     private String author;
     private String publisher;
-    private String category;
     private String imageUrl;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -37,7 +36,6 @@ public class DiaryResponseDto {
                 .title(diary.getBook().getTitle())
                 .author(diary.getBook().getAuthor())
                 .publisher(diary.getBook().getPublisher())
-                .category(diary.getBook().getCategory())
                 .imageUrl(diary.getBook().getImageUrl())
                 .startDate(diary.getStartDate())
                 .endDate(diary.getEndDate())

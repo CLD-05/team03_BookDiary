@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>관리자</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700">
+<link th:href="@{/plugins/global/plugins.bundle.css}" rel="stylesheet">
+<link th:href="@{/css/style.bundle.css}" rel="stylesheet">
+<style>
+    html, body { height: 100%; overflow: hidden; }
+    #scrollContainer { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+</style>
+</head>
+
+<body>
+    <div class="d-flex flex-column" style="height: 100vh;">
+
+        <!--헤더-->
+        <div class="d-flex flex-column-auto bg-white border-bottom px-4 py-3">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <span class="fw-bolder fs-4 text-gray-900">🛠️ 관리자</span>
+                <button class="btn btn-sm btn-light"
+                        onclick="location.href='/diary/diary'">
+                    홈으로
+                </button>
+            </div>
+        </div>
+
+        <div id="scrollContainer" class="flex-grow-1" style="overflow-y: auto;">
+            <div class="p-4 w-100 d-flex flex-column gap-4">
+
+                <!--AI 사용 현황-->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title fs-6">🤖 AI 사용 현황</h3>
+                    </div>
+                    <div class="card-body d-flex flex-column gap-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="fs-7 text-gray-500">총 AI 호출 수</span>
+                            <span id="totalUsed" class="fs-7 fw-semibold text-gray-800">-</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="fs-7 text-gray-500">최대 호출 수</span>
+                            <span id="maxToken" class="fs-7 fw-semibold text-gray-800">-</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="fs-7 text-gray-500">남은 호출 수</span>
+                            <span id="remainingToken" class="fs-7 fw-semibold text-gray-800">-</span>
+                        </div>
+                        <div class="progress h-8px">
+                            <div id="tokenProgressBar"
+                                 class="progress-bar bg-primary"
+                                 style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--회원 목록-->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title fs-6">👥 회원 목록</h3>
+                        <div class="card-toolbar">
+                            <span id="userCount"
+                                  class="badge badge-light-primary badge-sm"></span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="userList" class="d-flex flex-column"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script th:src="@{/plugins/global/plugins.bundle.js}"></script>
+    <script th:src="@{/js/scripts.bundle.js}"></script>
+
+    <script>
+    function getToken() {
+        const cookies = document.cookie.split(';');
+        for (let c of cookies) {
+            const [key, val] = c.trim().split('=');
+            if (key === 'token') return val;
+        }
+        return null;
+    }
+
+    if (!getToken()) location.href = '/publishing/login';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAiTokenInfo();
+        loadUserList();
+    });
+
+    function loadAiTokenInfo() {
+        fetch('/api/admin/ai/token', {
+            headers: { 'Authorization': 'Bearer ' + getToken() }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (!res.result) return;
+            const d = res.data;
+            document.getElementById('totalUsed').textContent = d.usedToken + '회';
+            document.getElementById('maxToken').textContent = d.maxToken + '회';
+            document.getElementById('remainingToken').textContent = d.remainingToken + '회';
+            const pct = Math.min((d.usedToken / d.maxToken) * 100, 100);
+            const bar = document.getElementById('tokenProgressBar');
+            bar.style.width = pct + '%';
+            bar.className = 'progress-bar ' +
+                (pct > 80 ? 'bg-danger' : pct > 50 ? 'bg-warning' : 'bg-primary');
+        });
+    }
+
+    function loadUserList() {
+        fetch('/api/admin/users', {
+            headers: { 'Authorization': 'Bearer ' + getToken() }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (!res.result) return;
+            const users = res.data.users;
+            document.getElementById('userCount').textContent = users.length + '명';
+
+            const list = document.getElementById('userList');
+            users.forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'border-bottom px-4 py-3 d-flex justify-content-between align-items-center';
+                item.innerHTML = `
+                    <div class="d-flex flex-column gap-1">
+                        <span class="fw-semibold fs-7 text-gray-800">${user.nickname}</span>
+                        <span class="fs-8 text-gray-500">${user.email || '-'}</span>
+                        <span class="badge badge-sm w-auto
+                            ${user.role === 'ROLE_ADMIN' ? 'badge-light-danger' : 'badge-light-info'}">
+                            ${user.role === 'ROLE_ADMIN' ? '관리자' : '일반'}
+                        </span>
+                    </div>
+                    <div class="d-flex flex-column align-items-end gap-2">
+                        <span class="badge badge-sm
+                            ${user.status === 'ACTIVE' ? 'badge-light-success' : 'badge-light-danger'}">
+                            ${user.status === 'ACTIVE' ? '정상' : '정지'}
+                        </span>
+                        ${user.role !== 'ROLE_ADMIN' ? `
+                            <button class="btn btn-sm
+                                ${user.status === 'ACTIVE' ? 'btn-light-danger' : 'btn-light-success'}"
+                                    onclick="toggleStatus(${user.userId}, '${user.status}')">
+                                ${user.status === 'ACTIVE' ? '정지' : '활성화'}
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        });
+    }
+
+    function toggleStatus(userId, currentStatus) {
+        const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+        const msg = newStatus === 'SUSPENDED'
+            ? '이 회원을 정지하시겠습니까?'
+            : '이 회원을 활성화하시겠습니까?';
+
+        Swal.fire({
+            text: msg,
+            icon: "warning",
+            buttonsStyling: false,
+            showCancelButton: true,
+            confirmButtonText: "확인",
+            cancelButtonText: "취소",
+            customClass: {
+                confirmButton: "btn btn-primary",
+                cancelButton: "btn btn-light"
+            }
+        }).then(result => {
+            if (result.isConfirmed) {
+                fetch(`/api/admin/users/${userId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getToken()
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.result) {
+                        Swal.fire({
+                            text: res.data.message,
+                            icon: "success",
+                            buttonsStyling: false,
+                            confirmButtonText: "확인",
+                            customClass: { confirmButton: "btn btn-primary" }
+                        }).then(() => location.reload());
+                    }
+                });
+            }
+        });
+    }
+    </script>
+
+</body>
+</html>

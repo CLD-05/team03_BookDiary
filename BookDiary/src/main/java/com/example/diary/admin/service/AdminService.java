@@ -2,9 +2,11 @@ package com.example.diary.admin.service;
 
 import com.example.diary.admin.dto.AdminRequestDto;
 import com.example.diary.admin.dto.AdminResponseDto;
+import com.example.diary.ailog.repository.AiLogRepository;
 import com.example.diary.user.entity.TbUser;
 import com.example.diary.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +17,12 @@ import java.util.List;
 public class AdminService {
 
     private final UserRepository userRepository;
+    private final AiLogRepository aiLogRepository;
 
-    // 회원 리스트 조회
+    @Value("${spring.ai.google.genai.api-key}")
+    private String geminiApiKey;
+
     public AdminResponseDto.UserList getUserList() {
-
         List<AdminResponseDto.UserInfo> users = userRepository.findAll().stream()
                 .map(user -> new AdminResponseDto.UserInfo(
                         user.getIdxUser(),
@@ -28,24 +32,25 @@ public class AdminService {
                         user.getRole().name()
                 ))
                 .toList();
-
         return new AdminResponseDto.UserList(users);
     }
 
-    // 회원 상태 변경
     @Transactional
     public void updateUserStatus(Long userId, AdminRequestDto.UpdateUserStatus requestDto) {
-
         TbUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원이 없습니다."));
-
         TbUser.Status status = TbUser.Status.valueOf(requestDto.getStatus().toUpperCase());
-
         user.updateStatus(status);
     }
 
     public AdminResponseDto.AiTokenInfo getAiTokenInfo() {
-        return null;
+        long totalUsed = aiLogRepository.count();
+        return new AdminResponseDto.AiTokenInfo(
+                geminiApiKey,
+                1000,
+                totalUsed,
+                1000 - totalUsed
+        );
     }
 
     public void updateAiToken(AdminRequestDto.UpdateAiToken requestDto) {

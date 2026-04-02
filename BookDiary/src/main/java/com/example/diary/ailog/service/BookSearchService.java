@@ -9,86 +9,71 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookSearchService {
 
-    private final RestTemplate restTemplate;
-    private final KakaoBookConfig kakaoBookConfig;
-    private final ObjectMapper objectMapper;
+	private final RestTemplate restTemplate;
+	private final KakaoBookConfig kakaoBookConfig;
+	private final ObjectMapper objectMapper;
 
-    public AiLogResponseDto.BookItem verifyAndEnrichBook(
-            String title, String author, String reason) {
-        try {
-            // 1차: 제목 + 저자
-            AiLogResponseDto.BookItem result = searchKakao(title + " " + author, author, reason);
-            if (result != null) return result;
+	private AiLogResponseDto.BookItem searchKakao(String query, String originalAuthor, String reason) {
+		try {
+			// URLEncoder 대신 UriComponentsBuilder 사용
+			String url = UriComponentsBuilder.fromHttpUrl("https://dapi.kakao.com/v3/search/book")
+					.queryParam("query", query).queryParam("size", 1).build().toUriString();
 
-            // 2차: 제목만
-            log.info("제목만으로 재검색: {}", title);
-            result = searchKakao(title, author, reason);
-            if (result != null) return result;
+			log.info("요청 URL: {}", url);
 
-            // 3차: 카카오에서 못 찾아도 Gemini 결과 그대로 반환
-            log.warn("Kakao에서 찾지 못해 Gemini 결과 사용: {} - {}", title, author);
-            return AiLogResponseDto.BookItem.builder()
-                    .title(title)
-                    .author(author)
-                    .publisher(null)
-                    .isbn(null)
-                    .imageUrl(null)
-                    .reason(reason)
-                    .build();
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Authorization", "KakaoAK " + kakaoBookConfig.getKakaoApiKey());
+			HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        } catch (Exception e) {
-            log.error("검증 실패 - title: {}, error: {}", title, e.getMessage());
-            return AiLogResponseDto.BookItem.builder()
-                    .title(title)
-                    .author(author)
-                    .publisher(null)
-                    .isbn(null)
-                    .imageUrl(null)
-                    .reason(reason)
-                    .build();
-        }
-    }
+			ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
-    private AiLogResponseDto.BookItem searchKakao(String query, String originalAuthor, String reason) {
-        try {
-            String encodedQuery = java.net.URLEncoder.encode(query, "UTF-8");
-            String url = "https://dapi.kakao.com/v3/search/book?query=" + encodedQuery + "&size=1";
+			log.info("카카오 응답: {}", response.getBody());
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "KakaoAK " + kakaoBookConfig.getKakaoApiKey());
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+			JsonNode root = objectMapper.readTree(response.getBody());
+			JsonNode documents = root.path("documents");
 
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url, HttpMethod.GET, entity, String.class);
+			if (documents.isEmpty())
+				return null;
 
-            JsonNode root = objectMapper.readTree(response.getBody());
-            JsonNode documents = root.path("documents");
+			JsonNode book = documents.get(0);
+			String kakaoAuthor = book.path("authors").isEmpty() ? originalAuthor : book.path("authors").get(0).asText();
 
-            if (documents.isEmpty()) return null;
+			return AiLogResponseDto.BookItem.builder().title(book.path("title").asText()).author(kakaoAuthor)
+					.publisher(book.path("publisher").asText()).isbn(book.path("isbn").asText())
+					.imageUrl(book.path("thumbnail").asText()).reason(reason).build();
 
-            JsonNode book = documents.get(0);
-            String kakaoAuthor = book.path("authors").isEmpty()
-                    ? originalAuthor
-                    : book.path("authors").get(0).asText();
+		} catch (Exception e) {
+			log.error("Kakao 검색 실패 - query: {}, error: {}", query, e.getMessage());
+			return null;
+		}
+	}
 
-            return AiLogResponseDto.BookItem.builder()
-                    .title(book.path("title").asText())
-                    .author(kakaoAuthor)
-                    .publisher(book.path("publisher").asText())
-                    .isbn(book.path("isbn").asText())
-                    .imageUrl(book.path("thumbnail").asText())
-                    .reason(reason)
-                    .build();
+	public AiLogResponseDto.BookItem verifyAndEnrichBook(String title, String author, String reason) {
+		try {
+			// 1차: 제목 + 저자
+			AiLogResponseDto.BookItem result = searchKakao(title + " " + author, author, reason);
+			if (result != null)
+				return result;
 
-        } catch (Exception e) {
-            log.error("Kakao 검색 실패 - query: {}, error: {}", query, e.getMessage());
-            return null;
-        }
-    }
+			// 2차: 제목만
+			log.info("제목만으로 재검색: {}", title);
+			result = searchKakao(title, author, reason);
+			if (result != null)
+				return result;
+
+			log.warn("Kakao에서 찾지 못함: {} - {}", title, author);
+			return null;
+
+		} catch (Exception e) {
+			log.error("검증 실패 - title: {}, error: {}", title, e.getMessage());
+			return null;
+		}
+	}
 }

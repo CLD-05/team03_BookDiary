@@ -39,7 +39,6 @@ public class BookService {
                         .title(book.getTitle())
                         .author(book.getAuthor())
                         .publisher(book.getPublisher())
-                        .category(book.getCategory())
                         .imageUrl(book.getImageUrl())  // 수정
                         .publishDate(book.getPublishDate())
                         .build())

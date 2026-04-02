@@ -17,6 +17,7 @@ local.properties
 # Config
 src/main/resources/application*.properties
 src/main/resources/application*.yml
+src/main/resources/application-secret.properties
 
 # External tool builders
 .externalToolBuilders/

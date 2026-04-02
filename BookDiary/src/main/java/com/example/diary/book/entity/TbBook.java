@@ -30,9 +30,6 @@ public class TbBook {
     @Column(name = "Publisher", length = 100)
     private String publisher;
 
-    @Column(name = "Category", length = 50)
-    private String category;
-
     @Column(name = "ImageURL", length = 500)
     private String imageUrl;
 

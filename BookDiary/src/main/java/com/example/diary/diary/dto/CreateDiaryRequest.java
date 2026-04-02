@@ -24,7 +24,6 @@ public class CreateDiaryRequest {
 
     private String author;
     private String publisher;
-    private String category;
     private String imageUrl;
     private LocalDate publishDate;
 

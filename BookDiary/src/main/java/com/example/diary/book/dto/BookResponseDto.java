@@ -13,7 +13,6 @@ public class BookResponseDto {
     private String title;
     private String author;
     private String publisher;
-    private String category;
     private String imageUrl;
     private LocalDate publishDate;
 }

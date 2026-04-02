@@ -55,7 +55,7 @@ public class DiaryService {
 
 	private TbBook saveBook(CreateDiaryRequest request, String normalizedIsbn) {
 		TbBook book = TbBook.builder().isbn(normalizedIsbn).title(request.getTitle()).author(request.getAuthor())
-				.publisher(request.getPublisher()).category(request.getCategory()).imageUrl(request.getImageUrl())
+				.publisher(request.getPublisher()).imageUrl(request.getImageUrl())
 				.publishDate(request.getPublishDate()).build();
 
 		return bookRepository.save(book);

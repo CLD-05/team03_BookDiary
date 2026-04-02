@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700">
+<link th:href="@{/plugins/global/plugins.bundle.css}" rel="stylesheet">
+<link th:href="@{/css/style.bundle.css}" rel="stylesheet">
+<style>
+    html, body { height: 100%; overflow: hidden; }
+    #scrollContainer { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+</style>
+</head>
+
+<body>
+    <div class="d-flex flex-column" style="height: 100vh;">
+
+        <div th:replace="~{fragments/header :: header-main}"></div>
+
+        <div id="scrollContainer" class="flex-grow-1" style="overflow-y: auto;">
+            <div class="p-4 w-100 d-flex flex-column gap-4">
+
+                <!--책 추천-->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title">📚 AI 책 추천</h3>
+                    </div>
+                    <div class="card-body d-flex flex-column gap-3">
+                        <div>
+                            <label class="form-label fw-semibold text-gray-700 fs-7">카테고리 선택</label>
+                            <select id="recommendCategory" class="form-select form-select-lg">
+                                <option value="">전체</option>
+                                <option value="소설">소설</option>
+                                <option value="동화">동화</option>
+                                <option value="에세이">에세이</option>
+                                <option value="인문">인문</option>
+                                <option value="경제/경영">경제/경영</option>
+                                <option value="자기계발">자기계발</option>
+                                <option value="판타지">판타지</option>
+                            </select>
+                        </div>
+                        <button type="button" onclick="getRecommend()"
+                                class="btn btn-primary w-100">
+                            <span id="recommendBtnText">추천 받기</span>
+                            <span id="recommendSpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                        </button>
+                    </div>
+                    <div id="recommendResult" class="d-none">
+                        <div class="card-footer d-flex flex-column gap-3" id="recommendList"></div>
+                    </div>
+                </div>
+
+                <!--월간 독서 리포트-->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title">📊 월간 독서 리포트</h3>
+                    </div>
+                    <div class="card-body d-flex flex-column gap-3">
+                        <p class="fs-7 text-gray-500 mb-0">이번 달 독서 기록을 분석해드려요.</p>
+                        <button type="button" onclick="getReport()"
+                                class="btn btn-primary w-100">
+                            <span id="reportBtnText">리포트 받기</span>
+                            <span id="reportSpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                        </button>
+                    </div>
+                    <div id="reportResult" class="d-none">
+                        <div class="card-footer">
+                            <p id="reportContent" class="fs-7 text-gray-700 lh-lg mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!--줄거리 요약-->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title">📖 줄거리 요약</h3>
+                    </div>
+                    <div class="card-body d-flex flex-column gap-3">
+                        <div>
+                            <label class="form-label fw-semibold text-gray-700 fs-7">책 제목</label>
+                            <input type="text" id="summaryTitle" class="form-control"
+                                   placeholder="책 제목을 입력하세요">
+                        </div>
+                        <div>
+                            <label class="form-label fw-semibold text-gray-700 fs-7">저자</label>
+                            <input type="text" id="summaryAuthor" class="form-control"
+                                   placeholder="저자를 입력하세요">
+                        </div>
+                        <button type="button" onclick="getSummary()"
+                                class="btn btn-primary w-100">
+                            <span id="summaryBtnText">요약 받기</span>
+                            <span id="summarySpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                        </button>
+                    </div>
+                    <div id="summaryResult" class="d-none">
+                        <div class="card-footer">
+                            <p id="summaryContent" class="fs-7 text-gray-700 lh-lg mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/navbar :: navbar-main('ai')}"></div>
+
+    </div>
+
+    <script th:src="@{/plugins/global/plugins.bundle.js}"></script>
+    <script th:src="@{/js/scripts.bundle.js}"></script>
+
+    <script>
+    function getToken() {
+        const cookies = document.cookie.split(';');
+        for (let c of cookies) {
+            const [key, val] = c.trim().split('=');
+            if (key === 'token') return val;
+        }
+        return null;
+    }
+
+    if (!getToken()) location.href = '/publishing/login';
+
+    // 책 추천
+    function getRecommend() {
+        const category = document.getElementById('recommendCategory').value;
+        const btn = document.getElementById('recommendBtnText');
+        const spinner = document.getElementById('recommendSpinner');
+
+        btn.textContent = '추천 중...';
+        spinner.classList.remove('d-none');
+
+        fetch('/api/ai/recommend', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getToken()
+            },
+            body: JSON.stringify({ category })
+        })
+        .then(res => res.json())
+        .then(res => {
+            const result = document.getElementById('recommendResult');
+            const list = document.getElementById('recommendList');
+            list.innerHTML = '';
+            result.classList.remove('d-none');
+
+            if (!res.books || res.books.length === 0) {
+                list.innerHTML = '<p class="fs-7 text-gray-400">추천 결과가 없어요.</p>';
+                return;
+            }
+
+            res.books.forEach(book => {
+                const item = document.createElement('div');
+                item.className = 'card border';
+                item.innerHTML = `
+                    <div class="card-body py-3">
+                        <div class="d-flex gap-3">
+                            <img src="${book.imageUrl || 'https://picsum.photos/50/70'}"
+                                 class="rounded"
+                                 style="width: 50px; height: 70px; object-fit: cover;">
+                            <div class="d-flex flex-column gap-1 flex-grow-1">
+                                <span class="fw-bold fs-6 text-gray-800">${book.title}</span>
+                                <span class="fs-7 text-gray-500">${book.author} · ${book.publisher || ''}</span>
+                                <p class="fs-8 text-gray-600 mb-0 mt-1">${book.reason}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        })
+        .catch(() => {
+            Swal.fire({
+                text: "추천 중 오류가 발생했습니다.",
+                icon: "error",
+                buttonsStyling: false,
+                confirmButtonText: "확인",
+                customClass: { confirmButton: "btn btn-danger" }
+            });
+        })
+        .finally(() => {
+            btn.textContent = '추천 받기';
+            spinner.classList.add('d-none');
+        });
+    }
+
+    // 월간 독서 리포트
+    function getReport() {
+        const btn = document.getElementById('reportBtnText');
+        const spinner = document.getElementById('reportSpinner');
+
+        btn.textContent = '분석 중...';
+        spinner.classList.remove('d-none');
+
+        fetch('/api/ai/report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getToken()
+            },
+            body: JSON.stringify({})
+        })
+        .then(res => res.json())
+        .then(res => {
+            const result = document.getElementById('reportResult');
+            const content = document.getElementById('reportContent');
+            result.classList.remove('d-none');
+            content.textContent = res.report || '리포트를 가져올 수 없습니다.';
+        })
+        .catch(() => {
+            Swal.fire({
+                text: "리포트 생성 중 오류가 발생했습니다.",
+                icon: "error",
+                buttonsStyling: false,
+                confirmButtonText: "확인",
+                customClass: { confirmButton: "btn btn-danger" }
+            });
+        })
+        .finally(() => {
+            btn.textContent = '리포트 받기';
+            spinner.classList.add('d-none');
+        });
+    }
+
+    // 줄거리 요약
+    function getSummary() {
+        const title = document.getElementById('summaryTitle').value;
+        const author = document.getElementById('summaryAuthor').value;
+        const btn = document.getElementById('summaryBtnText');
+        const spinner = document.getElementById('summarySpinner');
+
+        if (!title.trim()) {
+            Swal.fire({
+                text: "책 제목을 입력해주세요.",
+                icon: "warning",
+                buttonsStyling: false,
+                confirmButtonText: "확인",
+                customClass: { confirmButton: "btn btn-primary" }
+            });
+            return;
+        }
+
+        btn.textContent = '요약 중...';
+        spinner.classList.remove('d-none');
+
+        fetch('/api/ai/summary', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getToken()
+            },
+            body: JSON.stringify({ title, author })
+        })
+        .then(res => res.json())
+        .then(res => {
+            const result = document.getElementById('summaryResult');
+            const content = document.getElementById('summaryContent');
+            result.classList.remove('d-none');
+            content.textContent = res.summary || '요약을 가져올 수 없습니다.';
+        })
+        .catch(() => {
+            Swal.fire({
+                text: "요약 중 오류가 발생했습니다.",
+                icon: "error",
+                buttonsStyling: false,
+                confirmButtonText: "확인",
+                customClass: { confirmButton: "btn btn-danger" }
+            });
+        })
+        .finally(() => {
+            btn.textContent = '요약 받기';
+            spinner.classList.add('d-none');
+        });
+    }
+    </script>
+
+</body>
+</html>

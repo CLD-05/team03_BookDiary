@@ -5,13 +5,13 @@ import com.example.diary.ailog.entity.TbAiLog;
 import com.example.diary.ailog.repository.AiLogRepository;
 import com.example.diary.book.entity.TbBook;
 import com.example.diary.diary.entity.TbDiary;
+import com.example.diary.diary.repository.DiaryRepository;
 import com.example.diary.user.entity.TbUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
-import com.example.diary.diary.repository.DiaryRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,7 +26,6 @@ public class AiLogService {
     private final AiLogRepository aiLogRepository;
     private final ObjectMapper objectMapper;
     private final DiaryRepository diaryRepository;
-
 
     // 줄거리 요약
     public AiSummaryResponseDto getSummary(AiSummaryRequestDto request, TbUser user) {
@@ -61,16 +60,13 @@ public class AiLogService {
         }
     }
 
-    // AI 책 추천 (Gemini + Kakao 교차검증)
+    // AI 책 추천
     public AiLogResponseDto getRecommendations(AiLogRequestDto request, TbUser user) {
-
-        // tbDiary에서 로그인한 유저의 독서 이력 조회
         List<TbDiary> diaries = diaryRepository.findAllByUser_IdxUserOrderByIdxDiaryDesc(user.getIdxUser());
         List<String> readBooks = diaries.stream()
                 .map(d -> d.getBook().getTitle() + " (저자: " + d.getBook().getAuthor() + ")")
                 .collect(Collectors.toList());
 
-        // 독서 이력 없을 경우
         String readBooksStr = readBooks.isEmpty() ? "없음" : String.join(", ", readBooks);
 
         String prompt = String.format("""
@@ -88,8 +84,6 @@ public class AiLogService {
                 .call()
                 .content();
 
-
-        // Kakao 교차검증
         List<AiLogResponseDto.BookItem> verifiedBooks = new ArrayList<>();
         try {
             String cleaned = response.replaceAll("```json|```", "").trim();
@@ -113,6 +107,54 @@ public class AiLogService {
         return AiLogResponseDto.builder()
                 .books(verifiedBooks)
                 .build();
+    }
+
+    // 월간 독서 리포트
+    public AiReportResponseDto getMonthlyReport(TbUser user) {
+        List<TbDiary> diaries = diaryRepository.findAllByUser_IdxUserOrderByIdxDiaryDesc(user.getIdxUser());
+
+        long totalBooks = diaries.size();
+        long doneBooks = diaries.stream().filter(d -> d.getStatus().name().equals("DONE")).count();
+        long readingBooks = diaries.stream().filter(d -> d.getStatus().name().equals("READING")).count();
+        long wantBooks = diaries.stream().filter(d -> d.getStatus().name().equals("WANT")).count();
+
+        String bookList = diaries.stream()
+                .map(d -> "- " + d.getBook().getTitle() + " (" + d.getStatus().name() + ")")
+                .collect(Collectors.joining("\n"));
+
+        String prompt = String.format("""
+                사용자의 독서 현황:
+                - 전체 등록 도서: %d권
+                - 완독: %d권
+                - 읽는 중: %d권
+                - 읽고 싶어요: %d권
+                
+                도서 목록:
+                %s
+                
+                위 독서 현황을 바탕으로 한국어로 월간 독서 리포트를 작성해줘.
+                칭찬과 격려를 포함하고, 다음 독서 목표도 제안해줘.
+                반드시 아래 JSON 형식으로만 응답해줘. 다른 텍스트 없이 JSON만:
+                {"report": "리포트 내용"}
+                """, totalBooks, doneBooks, readingBooks, wantBooks, bookList);
+
+        String response = chatClient.prompt()
+                .user(prompt)
+                .call()
+                .content();
+
+        saveAiLog(user, null, prompt, Map.of("report", response));
+
+        try {
+            String cleaned = response.replaceAll("```json|```", "").trim();
+            Map<String, String> result = objectMapper.readValue(cleaned, Map.class);
+            return new AiReportResponseDto(
+                    result.getOrDefault("report", "리포트를 가져올 수 없습니다.")
+            );
+        } catch (Exception e) {
+            log.error("리포트 파싱 실패: {}", e.getMessage());
+            return new AiReportResponseDto(response);
+        }
     }
 
     // tbAiLog 저장 공통 메서드

@@ -26,23 +26,13 @@ public class AdminResponseDto {
     }
 
     // 대시보드
-    @Getter
-    @AllArgsConstructor
-    public static class Dashboard {
-        private long totalUsers;
-        private long activeUsers;
-        private long totalDiaries;
-        private long totalAiUsage;
-    }
 
-    // AI 토큰 정보
+    // AI 토큰 사용량
     @Getter
     @AllArgsConstructor
     public static class AiTokenInfo {
-        private String apiKey;
-        private Integer maxToken;
-        private Long usedToken;
-        private Long remainingToken;
+        private Long totalRequestCount;
+        private Long totalTokenUsage;
     }
 
     // 공통 메시지 응답

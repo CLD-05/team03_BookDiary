@@ -30,14 +30,7 @@ public class AdminApiController extends BaseController {
     }
 
     @GetMapping("/ai/token")
-    public ResponseEntity<ApiResponse<AdminResponseDto.AiTokenInfo>> getAiTokenInfo() {
-        return ok(adminService.getAiTokenInfo());
-    }
-
-    @PatchMapping("/ai/token")
-    public ResponseEntity<ApiResponse<AdminResponseDto.Message>> updateAiToken(
-            @RequestBody AdminRequestDto.UpdateAiToken requestDto) {
-        adminService.updateAiToken(requestDto);
-        return ok(new AdminResponseDto.Message("AI 토큰 정보가 수정되었습니다."));
+    public ResponseEntity<AdminResponseDto.AiTokenInfo> getAiTokenInfo() {
+        return ResponseEntity.ok(adminService.getAiTokenInfo());
     }
 }

@@ -44,15 +44,12 @@ public class AdminService {
     }
 
     public AdminResponseDto.AiTokenInfo getAiTokenInfo() {
-        long totalUsed = aiLogRepository.count();
-        return new AdminResponseDto.AiTokenInfo(
-                geminiApiKey,
-                1000,
-                totalUsed,
-                1000 - totalUsed
-        );
-    }
 
-    public void updateAiToken(AdminRequestDto.UpdateAiToken requestDto) {
+        long totalRequestCount = aiLogRepository.count();      // 호출 수
+        long totalTokenUsage = aiLogRepository.sumTotalTokens(); // 토큰 합계
+        return new AdminResponseDto.AiTokenInfo(
+                totalRequestCount,
+                totalTokenUsage
+        );
     }
 }

@@ -29,7 +29,10 @@ public class UserService {
         userRepository.save(dto.toEntity(passwordEncoder.encode(dto.getPass())));
     }
 
+
+
     public LoginResponseDto login(LoginRequestDto dto) {
+
         TbUser user = userRepository.findByUserId(dto.getUserId())
                 .orElseThrow(() -> CustomException.badRequest("존재하지 않는 아이디입니다."));
 
@@ -53,6 +56,9 @@ public class UserService {
         user.updateProfile(dto.getName(), dto.getEmail());
 
         if (dto.getNewPass() != null && !dto.getNewPass().isBlank()) {
+            if (passwordEncoder.matches(dto.getNewPass(), user.getPass())) {
+                throw CustomException.badRequest("기존 비밀번호와 동일합니다.");
+            }
             user.updatePassword(passwordEncoder.encode(dto.getNewPass()));
         }
     }

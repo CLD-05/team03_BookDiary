@@ -3,14 +3,14 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "userId": "testuser",
-  "pass": "test1234"
+  "userId": "test",
+  "pass": "1234"
 }
 
 ### AI 줄거리 요약
 POST http://localhost:8080/api/ai/summary
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlciIsInJvbGUiOiJST0xFX1VTRVIiLCJpYXQiOjE3NzUwMjkwNTQsImV4cCI6MTc3NTExNTQ1NH0.sHYiiEmKtOyageZNizklCTonNQFFWRPO4Zqw5CaRGNo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0Iiwicm9sZSI6IlJPTEVfVVNFUiIsInVzZXJJZHgiOjExLCJpYXQiOjE3NzUwOTcyODAsImV4cCI6MTc3NTE4MzY4MH0.-vZ_fypHa0REUNrupLRNHLlCOKfWZ-KNf2yaRltjkPY",
 
 {
   "title": "해리포터",
@@ -20,7 +20,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlc
 ### AI 책 추천
 POST http://localhost:8080/api/ai/recommend
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlciIsInJvbGUiOiJST0xFX1VTRVIiLCJpYXQiOjE3NzUwMjkwNTQsImV4cCI6MTc3NTExNTQ1NH0.sHYiiEmKtOyageZNizklCTonNQFFWRPO4Zqw5CaRGNo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0Iiwicm9sZSI6IlJPTEVfVVNFUiIsInVzZXJJZHgiOjExLCJpYXQiOjE3NzUwOTcyODAsImV4cCI6MTc3NTE4MzY4MH0.-vZ_fypHa0REUNrupLRNHLlCOKfWZ-KNf2yaRltjkPY",
 
 {
   "category": "소설"
